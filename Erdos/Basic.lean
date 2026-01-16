@@ -40,7 +40,8 @@ Navigation guide (Lean names corresponding to manuscript steps):
 * **Period arithmetic:** `lcm_eq_mul_of_coprime`, `le_lcm_left_of_pos`, `le_lcm_right_of_pos`,
   `lt_lcm_of_coprime_of_one_lt_right`, `lt_lcm_of_coprime_of_one_lt_left`, and the denominator
   monotonicity lemmas `periodDenom_lt_of_lt` / `periodDenom_le_of_le`.
-* **Carry-span proxy:** `Collision.collisionMultiplicity`, `Collision.collisionMultiplicity_le_card`,
+* **Carry-span proxy:** `Collision.collisionMultiplicity`,
+`Collision.collisionMultiplicity_le_card`,
   `Collision.collisionMultiplicity_lt_pow_succ_log`.
 * **Witness selection in finite shells:** `Witness.vp`, `Witness.exists_witness_vp`.
 * **Integer block/carry model:** `BlockModel.blockBase`, `BlockModel.trunc`, `BlockModel.carry`,
@@ -84,7 +85,7 @@ theorem lcm_eq_mul_of_coprime {L K : ℕ} (h : Nat.Coprime L K) : Nat.lcm L K = 
   simpa using h.lcm_eq_mul
 
 /-!
-### Period growth ("crescente")
+### Period growth ("crescent")
 
 In the manuscript (Proposition “Periodicity Recurrence under Stability”), the period lengths
 satisfy
