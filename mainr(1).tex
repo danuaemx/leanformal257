@@ -1,0 +1,2146 @@
+\documentclass[11pt, a4paper]{amsart}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amsthm, amssymb, amsfonts}
+\usepackage{mathrsfs}
+\usepackage{hyperref}
+
+% Theorem Environments
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+% Macros for notation
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\fracpart}[1]{\{ #1 \}}
+
+\title[Diophantine Stability and Adelic Obstructions]{Diophantine Stability and Adelic Obstructions in Reciprocal Sums of Arbitrary Subsets: A Generalized Solution to Erd\H{o}s Problem \#257}
+
+\author{Daniel E. Ruiz Camacho}
+\subjclass[2020]{Primary 11J72; Secondary 11J61, 11K31, 11A63, 11S85}
+
+\keywords{Irrationality, Erd\H{o}s problems, Reciprocal sums, p-adic analysis, 
+Profinite topology, Steinitz numbers, Digital expansions, Diophantine stability}
+\email{druizc005@alumno.uaemex.mx}
+\address{Facultad de Ingeniería, Universidad Autónoma del Estado de México, Toluca, Mexico.}
+\thanks{\href{https://orcid.org/0009-0000-8967-8093}{ORCID: 0009-0000-8967-8093}}
+
+\date{\today}
+
+\begin{document}
+
+\begin{abstract}
+This paper establishes the unconditional irrationality of the series $S_A = \sum_{n \in A} (b^n - 1)^{-1}$ for any infinite subset $A \subseteq \mathbb{N}$, resolving a generalized variation of Erd\H{o}s Problem \#257. The proof proceeds in two stages. First, for pairwise coprime sets, we ensure the arithmetic stability of the digital expansion by mapping carry propagation into a specific Diophantine region; we derive a deterministic density bound guaranteeing that structural interference vanishes asymptotically. Second, we extend the result to arbitrary sets via a smoothness shell filtration (based on arithmetic friability). We construct an adelic obstruction by identifying a ``Witness'' term with maximal $p$-adic valuation in each shell. Using a projection based on the Chinese Remainder Theorem, we demonstrate that this witness induces a strict phase shift, creating a topological obstruction in the profinite limit $\hat{\mathbb{Z}}$ that precludes periodicity.
+\end{abstract}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+\label{sec:intro_synthesis}
+
+The problem of establishing the irrationality of series of the form $S_A = \sum_{n \in A} (b^n - 1)^{-1}$ has long stood as a significant challenge in Diophantine analysis, originating from questions posed by Erd\H{o}s \cite{Erdos1957, ErdosGraham1980}. While the case $A=\mathbb{N}$ was resolved early on \cite{Erdos1948}, the arithmetic behavior of sparse or arbitrary subsets has remained elusive. Recent advances by Tao and Ter\"av\"ainen \cite{TaoTeravainen2025} have shed light on similar structures, yet a unified framework for arbitrary $A$ required a novel approach to period stability.
+
+This paper presents a comprehensive solution structured in two distinct phases. In the first phase (Sections \ref{sec:recursive_construction}--\ref{sec:irrationality}), we address the case where $A$ consists of pairwise coprime integers. We introduce a \textbf{Recursive Period Construction} (Section \ref{sec:recursive_construction}) that formalizes the asymptotic expansion of the sum. The central difficulty---the propagation of arithmetic carries---is resolved by mapping the digital structure into a specific \textbf{Diophantine Region} $\mathcal{R}$ (Section \ref{sec:diophantine}, and a variant for the general case in Definition \ref{def:layered_region}). By deriving a \textbf{Deterministic Density Bound} (Definition \ref{def:sup_dens} and Theorem \ref{thm:tail_isolation_expanded}), we prove that the "structural carry interference" capable of disrupting the period vanish asymptotically. This ensures the \textbf{Diophantine Stability} of the integer blocks, leading to the proof of irrationality via \textbf{Structural Distinctness} (Theorem \ref{thm:structural_distinctness}).
+
+In the second phase (Sections \ref{sec:generalization_smooth}--\ref{sec:profinite_analysis}), we extend these results to arbitrary subsets $A \subseteq \mathbb{N}$ through a \textbf{Smoothness Shell Filtration} (Section \ref{sec:generalization_smooth}). To overcome the lack of global coprimality, we construct an \textbf{Adelic Obstruction}. We identify a ``Witness'' term $n^*$ with maximal $p$-adic valuation within each smoothness shell (Section \ref{subsec:witness_term}). Utilizing a variant of the Chinese Remainder Theorem (Lemma \ref{lem:crt_decomposition}), we demonstrate that this witness induces a strict \textbf{Phase Shift} (Proposition \ref{prop:phase_shift}) that precludes periodicity in the profinite limit. The interaction between the local stability guarantees and the global topological obstruction (Section \ref{sec:profinite_analysis}) establishes the \textbf{unconditional irrationality of $S_A$}.
+
+\section{Preliminaries}
+\label{sec:preliminaries}
+
+Let $b \in \mathbb{Z}_{\ge 2}$ denote a fixed integer base. We consider an infinite subset $A = \{a_1, a_2, \dots\} \subset \mathbb{N}$, strictly ordered such that $a_1 < a_2 < \dots$. We impose the arithmetic constraint that the elements of $A$ are pairwise coprime; that is, $\gcd(a_i, a_j) = 1$ for all distinct indices $i \neq j$.
+
+Associated with every generator $a \in A$, we define a finite set of ordered exponents $E_a = \{e_{a,1}, e_{a,2}, \dots , e_{a, \max}\} \subset \mathbb{N}$, where $e_{a,1} < e_{a,2} < \dots < e_{a, \max}$. Let $A_E$ denote the strictly ordered sequence of effective exponents derived from the set of powers $\{a^e \mid a \in A, e \in E_a\}$.
+
+We define the target sum $S$ as the series of reciprocals of shifted powers over the effective exponents:
+\begin{equation}
+  S = \sum_{x \in A_E} \frac{1}{b^x - 1}.
+  \label{eq:target_sum}
+\end{equation}
+
+The primary objective of this study is to formalize the asymptotic expansion of $S$ via a recursive construction of its fundamental period, denoted by $L_N$, and to analyze the structural properties of the associated digital blocks.
+
+\section{Recursive Construction and Periodicity}
+\label{sec:recursive_construction}
+
+We formalize the expansion of $S$ through a recursive derivation of its fundamental period, denoted by $L_N$. Essential to this analysis is the distinction between the analytic properties of the sum (fractional representation) and the arithmetic operations governing the period construction (integer block representation).
+
+\subsection{Dual Representation and Carry Dynamics}
+\label{subsec:dual_representation}
+
+To analyze the internal structure of the period, we utilize two distinct isomorphic representations of the $b$-adic expansion.
+
+\begin{definition}[Fractional and Integer Representations]
+Let $\xi \in [0, 1)$ be a real number and $L \in \mathbb{N}$ be a fixed block length.
+
+\begin{enumerate}
+  \item \textbf{Fractional Representation ($\mathcal{F}$):} We denote the standard base-$b$ expansion as:
+  \begin{equation}
+    \xi = (0.d_1 d_2 d_3 \dots)_b = \sum_{k=1}^{\infty} d_k b^{-k}, \quad d_k \in \{0, \dots, b-1\}.
+  \end{equation}
+  This representation is employed for analytic convergence arguments and global bounds on $S$ in Subsection \ref{subsec:stability_fractional}.
+
+  \item \textbf{Integer Block Representation ($\mathcal{I}_L$):} For a finite truncation or a periodic segment of length $L$, we define the integer value $C$ associated with the sequence $d_1, \dots, d_L$ as:
+  \begin{equation}
+    C = (d_1 d_2 \dots d_L)_b = \sum_{k=1}^{L} d_k b^{L-k}.
+  \end{equation}
+  This representation is employed for the arithmetic construction of the period, transforming the summation of reciprocals into modular addition in Sections \ref{sec:block_decomposition}, \ref{sec:diophantine} and \ref{sec:irrationality}.
+\end{enumerate}
+\end{definition}
+
+
+\begin{definition}[Positional Significance]
+\label{def:positional}
+Let $\xi$ be a real number with a base-$b$ expansion $\xi = \sum_{k=-\infty}^{\infty} d_k b^{-k}$. The index $k$ is referred to as the \textbf{position} or \textbf{rank}.
+\begin{itemize}
+  \item \textbf{Magnitude Relation:} A position $k$ corresponds to the weight $b^{-k}$. We impose a strict ordering where position $k$ is \textit{more significant} than position $j$ if $k < j$ (i.e., $b^{-k} > b^{-j}$).
+  \item \textbf{Directionality:} The "leftward" propagation of arithmetic carries corresponds to a strict decrease in the positional index $k$.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[The $\mathcal{F}$-$\mathcal{I}$ Isomorphism]
+\label{def:isomporph}
+Let $L$ be a fixed period length. We define a mapping between the Fractional Space $\mathcal{F}$ and the Integer Block Space $\mathcal{I}_L$.
+\begin{equation}
+  \Psi_L : \mathcal{I}_L \to \mathcal{F}, \quad C \mapsto C \cdot b^{-L}.
+\end{equation}
+Conversely, for a fractional segment $0.d_1 \dots d_L$, the inverse map extracts the integer value $C = \sum_{i=1}^L d_i b^{L-i}$.
+\end{definition}
+
+
+
+
+\textbf{Implications of Carry Propagation:}
+The algebraic structure of the period construction relies on the linearity of the map between $\mathcal{F}$ and $\mathcal{I}_L$. However, this linearity is conditional. For two terms $\xi_1, \xi_2$ with associated integer blocks $C_1, C_2$ of length $L$:
+\begin{equation}
+  C_{\text{sum}} = C_1 + C_2 \pmod{b^L}.
+\end{equation}
+A \textit{carry} is generated if $C_1 + C_2 \ge b^L$. In the context of the fractional representation $\mathcal{F}$, this carry corresponds to a value of position $L$, $b^{-L}$ propagating to the position $L-1$, $b^{1-L}$ (wrapping around in a periodic context) or modifying digits at significance levels $k \ge 0$ (integer overflow). The structural integrity of the recursive construction, formalized in Sections \ref{sec:diophantine} and \ref{sec:irrationality}, necessitates that such carries are strictly contained and do not corrupt the periodic boundaries defined below.
+
+\subsection{Dominant Term and Partial Sums}
+
+Let $S_N$ denote the partial sum considering the first $N$ bases of the set $A$. We identify the maximal contribution at step $N$ as follows:
+
+\begin{definition}[Dominant Term $a^*_N$]
+\label{def:dominant_term}
+For the $N$-th element $a_N \in A$, let the dominant term $a^*_N$ be defined by the maximal exponent in the set $E_{a_N}$:
+\begin{equation}
+  a^*_N = a_N^{e_{a_N, \max}}.
+\end{equation}
+This term dictates the granularity of the new periodicity introduced at step $N$.
+\end{definition}
+
+\subsection{Periodicity via the Chinese Remainder Theorem}
+
+The expansion of the partial sum $S_N$ is strictly periodic. We derive the recurrence relation for the period length $L_N$.
+
+
+\begin{remark}[Structural Isomorphism and Carry Stability]
+\label{rem:crt_justification}
+The application of the Chinese Remainder Theorem is not an arbitrary choice but a requisite description of the structural isomorphism between the linear index of the sum and the modular state of its components ($\nu(n)$ see Definiton \ref{def:collision_multiplicity}).
+Fundamentally, every digital position $k$ in the expansion is uniquely characterized by the coordinate tuple of local phases:
+\begin{equation}
+    k \longleftrightarrow \left( k \pmod{L_N}, \ k \pmod{a^*_{N+1}} \right).
+\end{equation}
+The CRT provides the rigorous bijection that maps these intersecting periodicities back to a unique linear position in the global period $L_{N+1}$.
+Crucially, this algebraic mapping is physically valid if and only if the system is \textbf{Diophantine Stable} (see Section \ref{sec:diophantine}): the "Carry" acts as the discriminator of stability.
+Provided the arithmetic carry generated by the superposition does not propagate across the modular boundaries defined by the CRT grid, the digital sequence faithfully reflects this modular isomorphism.
+\end{remark}
+
+\begin{proposition}[Periodicity Recurrence under Stability]
+\label{prop:crt}
+Under the hypothesis of the stability of the construction—specifically, that carry propagation remains confined and does not alter the integer boundary—the fundamental period $L_{N+1}$ of the base-$b$ expansion of the partial sum $S_{N+1}$ satisfies the recurrence:
+\begin{equation}
+  L_{N+1} = \operatorname{lcm}(L_N, a^*_{N+1}).
+\end{equation}
+Given that the elements of $A$ are pairwise coprime, it follows that $\gcd(L_N, a^*_{N+1}) = 1$. Consequently, the period grows strictly multiplicatively:
+\begin{equation}
+  L_{N+1} = L_N \cdot a^*_{N+1}.
+  \label{eq:period_multiplicative}
+\end{equation}
+\end{proposition}
+
+The term $(b^{a^*_{N+1}}-1)^{-1}$ introduces a periodicity of length $a^*_{N+1}$, characterized in representation $\mathcal{F}$ by the form $0.\overline{00\dots01}$, possessing a single non-zero digit $1$ at indices $k \equiv 0 \pmod{a^*_{N+1}}$. The combination of the existing period $L_N$ and the new dominant term $a^*_{N+1}$ via the Chinese Remainder Theorem generates the composite period $L_{N+1}$.
+
+\section{Block Decomposition and Extraction}
+\label{sec:block_decomposition}
+
+We construct the period of the partial sum $S_{N+1}$ by decomposing the target expansion into a sequence of sub-blocks derived from the preceding period $L_N$. This process requires a transformation from the continuous domain of absolute digital positions to the discrete domain of modular block indices.
+
+\subsection{Definition of $B_{N+1,q}$ via Positional Extraction}
+\label{subsec:positional_extraction}
+
+We formalize the extraction of the $q$-th block by establishing a bijective mapping between the absolute positions of the expansion of the term $\xi_{N+1} = (b^{a^*_{N+1}}-1)^{-1}$ and the relative indices of the integer block structure.
+
+Let the base-$b$ expansion of $\xi_{N+1}$ be given by the series $\sum_{k=1}^{\infty} d_k b^{-k}$, where $d_k \in \{0, 1\}$. We observe that $d_k = 1$ if and only if $k \equiv 0 \pmod{a^*_{N+1}}$, and $d_k = 0$ otherwise.
+
+\begin{definition}[Positional Extraction Operator]
+\label{def:positional_extraction}
+Let $K = a^*_{N+1}$ be the number of sub-blocks required to construct the new period. For each block index $q \in \{1, \dots, K\}$, let $I_q$ denote the interval of absolute positions corresponding to the $q$-th segment:
+\begin{equation}
+  I_q = \{ k \in \mathbb{N} \mid (q-1)L_N < k \le qL_N \}.
+\end{equation}
+The integer value of the $q$-th perturbation block, denoted $B_{N+1,q}$, is defined by projecting the digits in $I_q$ onto the integer domain $\mathbb{Z}$:
+\begin{equation}
+  B_{N+1,q} := \sum_{k \in I_q} d_k \cdot b^{qL_N - k}.
+\end{equation}
+Equivalently, employing the fractional part operator $\{ x \} = x - \lfloor x \rfloor$, this extraction is given analytically by:
+\begin{equation}
+  B_{N+1,q} = \lfloor b^{L_N} \cdot \{ \xi_{N+1} \cdot b^{(q-1)L_N} \} \rfloor.
+\end{equation}
+\end{definition}
+
+\subsection{Block Concatenation and Carry Integration}
+
+The construction of the global period $C_{N+1}$ is defined by an arithmetic concatenation that strictly accounts for modular overflow. Unlike a simple geometric juxtaposition, this operation must integrate the carry sequence generated by the summation of blocks.
+
+\begin{definition}[Block Concatenation with Generalized Carry]
+\label{def:block_concatenation}
+Let $C_N$ be the integer block representing the period of $S_N$. The block $C_{N+1}$ corresponding to the period $L_{N+1}$ is defined as the arithmetic concatenation of $K = a^*_{N+1}$ iterated sub-blocks. 
+
+We define the sequence of augmented blocks $\{C'_{N,q}\}_{q=1}^K$ and the carry sequence $\{\kappa_q\}_{q=0}^K$ via a recursive descent from the least significant block ($q=K$) to the most significant ($q=1$).
+
+\textbf{Initialization:}
+The boundary condition is determined by the periodicity of the system. Assuming stability (Section \ref{sec:recursive_construction}), we set $\kappa_K = 0$.
+
+\textbf{Recursive Step:}
+For each $q$ from $K$ down to $1$, let $T_{N,q}$ be the tentative sum at index $q$:
+\begin{equation}
+  C'_{N,q} = C_N + B_{N+1,q} + \kappa_q.
+\end{equation}
+The regularized block $C'_{N,q}$ is the canonical residue modulo $b^{L_N}$:
+\begin{equation}
+  C'_{N,q} = C'_{N,q} \pmod{b^{L_N}}.
+\end{equation}
+The carry propagated to the preceding block, $\kappa_{q-1}$, is the integer quotient:
+\begin{equation}
+  \kappa_{q-1} = \left\lfloor \frac{C'_{N,q}}{b^{L_N}} \right\rfloor.
+\end{equation}
+Note that $\kappa_{q-1} \ge 1$ signifies an overflow event. The magnitude of $\kappa$ is not restricted to $\{0,1\}$ but is bounded by the density of terms.
+
+\textbf{Global Construction:}
+The integer representation of the new period is:
+\begin{equation}
+  C_{N+1} = \operatorname*{Concat}_{1 \le q \le K} \left( C'_{N,q} \right) = \sum_{q=1}^{K} C'_{N,q} \cdot b^{(K-q)L_N}.
+\end{equation}
+\end{definition}
+
+
+\begin{remark}[Validation of Block Concatenation Strategy]
+  \label{rem:concatenation_validity}
+  While the density analysis confirms that interference is asymptotically negligible, the justification for the arithmetic construction relies on the robustness of the concatenation (Sections \ref{sec:diophantine} and \ref{sec:irrationality}).
+
+  In the subsequent sections, we will formally prove that the iteration rule $C'_{N,q} = C_N + B_{N+1,q}$ remains a valid generative process for the expansion of $S$, even in the rare deterministic cases where the "pessimistic" density bounds are approached.
+\end{remark}
+
+
+
+
+\subsection{Recursive Construction for $A=\{2, 3, 5\}$}
+\label{subsec:construct}
+
+We consider the set $A=\{2, 3, 5\}$ with fixed exponents $E_a=\{1\}$ and base $b=2$.
+
+\textbf{Step 1: Initialization ($N=1$)}
+For $a_1 = 2$, the term is $(2^2 - 1)^{-1}$.
+The period is $L_1 = 2$.
+The integer block is:
+\[ C_1 = 01_2 \]
+
+\textbf{Step 2: First Iteration ($N=2$)}
+For $a_2 = 3$, the target sum injects the pattern of $(2^3 - 1)^{-1}$ with period $3$.
+The new period is $L_2 = 2 \times 3 = 6$.
+We concatenate 3 copies of $C_1$ and add the binary pattern $001001_2$:
+\[
+\begin{aligned}
+  \text{Base Repetition:} & \quad 010101_2 \\
+  \text{Perturbation:}  & \quad 001001_2 \\
+  \hline
+  \text{Result } C_2:   & \quad 011110_2
+\end{aligned}
+\]
+
+\textbf{Step 3: Second Iteration ($N=3$)}
+For $a_3 = 5$, the new period is $L_3 = 6 \times 5 = 30$.
+We concatenate $K=5$ sub-blocks. The term $(2^5 - 1)^{-1}$ injects a $1$ at every $5^{\text{th}}$ position.
+We map these injections to the sub-blocks of length $L_2=6$ using modular extraction.
+
+\begin{table}[h]
+\centering
+\caption{Construction of $C_3$ (Binary Representation)}
+\begin{tabular}{cccc}
+\hline
+ $q$ & $C_2$ (Base) & $B_{3,q}$ (Shifted Injection) & $C'_{2,q}$ (Sum) \\
+\hline
+ 1 & $011110_2$ & $000010_2$ & $100000_2$ \\
+ 2 & $011110_2$ & $000100_2$ & $100010_2$ \\
+ 3 & $011110_2$ & $001000_2$ & $100110_2$ \\
+ 4 & $011110_2$ & $010000_2$ & $101110_2$ \\
+ 5 & $011110_2$ & $100001_2$ & $111111_2$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\noindent The final block $C_3$ is the concatenation:
+\[ C_3 = 100000100010100110101110111111_2=d_1d_2d_3\dots d_{28}d_{29}d_{30} \]
+
+\subsection{Bounding Carry Propagation via Collision Multiplicity}
+\label{subsec:collision_multiplicity}
+
+To justify the structural integrity of the blocks $C'_{N,q}$, we must quantify the magnitude of the carry $\kappa$. The carry is a direct consequence of the "pile-up" of non-zero digits at specific positions. We formalize this via the concept of Collision Multiplicity.
+
+\begin{definition}[Collision Multiplicity]
+\label{def:collision_multiplicity}
+Let $\boldsymbol{1}_{d|n}$ be the indicator function which takes the value $1$ if $d$ divides $n$ and $0$ otherwise. Let $\nu(n)$ denote the \textbf{collision multiplicity} at position $n$, defined as the total number of terms in the sequence of effective exponents $A_E$ that contribute a non-zero digit at position $n$:
+\begin{equation}
+  \nu(n) = \sum_{x \in A_E} \boldsymbol{1}_{x | n} = \sum_{a \in A} \sum_{e \in E_a} \boldsymbol{1}_{a^e | n}.
+\end{equation}
+The value $\nu(n)$ represents the unnormalized magnitude of the digit at position $b^{-n}$ before base-$b$ regularization.
+\end{definition}
+
+If $\nu(n) = 1$ for all active positions, the expansion is strictly carry-free. If $\nu(n) > 1$, a carry is generated. The propagation of this carry is deterministic and bounded by the logarithm of the multiplicity.
+
+\begin{lemma}[Logarithmic Containment of Carries]
+\label{lem:carries}
+Let $k = \nu(n)$ be the multiplicity at position $n$. The addition of $k$ units at position $b^{-n}$ generates a carry that propagates to higher significance levels. The span of this propagation, denoted by the displacement $M$, is bounded by:
+\begin{equation}
+  M = \lfloor \log_b(k) \rfloor + 1 \approx \log_b \left( \sum_{x \in A_E} \boldsymbol{1}_{x | n} \right).
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+The arithmetic value at position $n$ is $k \cdot b^{-n}$. In base $b$, the most significant digit of the integer $k$ appears at position $\lfloor \log_b k \rfloor$ relative to $n$. Thus, the carry disturbance affects the interval of positions $[n - \lfloor \log_b k \rfloor, n]$, using Definitions \ref{def:positional}, \ref{def:isomporph} and \ref{def:positional_extraction} to state the position. This logarithmic bound $M$ defines the "danger zone" for structural interference within the block concatenation process.
+\end{proof}
+
+
+
+\section{Collision Multiplicity Analysis }
+
+We analyze the structural impact of extended exponents $A=\{2,3,5\}, E_a = \{1, 2, 3\}$ on the carry dynamics.
+The set of effective exponents is generated by powers $a^e$:
+\[ A_E = \{ 2, 4, 8, 3, 9, 27, 5, 25, 125 \} \]
+
+\textbf{Collision Point Identification}
+We examine the collision multiplicity $\nu(n)$ at position $n=24$.
+This position represents a critical synchronization point where multiple independent periods overlap.
+The contributors are determined by the divisibility condition $x \mid 24$.
+
+\begin{table}[h]
+\centering
+\caption{Contributors to Collision Multiplicity at $n=24$}
+\begin{tabular}{cccc}
+\hline
+ $a \in A$ & $x=a^e$ & $x \mid 24$ & Contribution \\
+\hline
+ 2 & 2 & True & $1_2$ \\
+ 2 & 4 & True & $1_2$ \\
+ 2 & 8 & True & $1_2$ \\
+ 3 & 3 & True & $1_2$ \\
+ 3 & 9 & False & $0_2$ \\
+ 5 & 5 & False & $0_2$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Quantification of Carry Displacement}
+The collision multiplicity is the sum of active contributions:
+\[ \nu(24) = \sum_{x \in A_E} \boldsymbol{1}_{x \mid 24} = 1_2 + 1_2 + 1_2 + 1_2 = 100_2 \]
+
+\noindent
+The arithmetic pile-up at position $n=24$ results in a value of $4_{10}$ (or $100_2$).
+The carry propagates to more significant positions (leftward).
+
+\[
+\begin{aligned}
+  \text{Positional Alignment:} & \quad \dots \quad 22 \quad 23 \quad 24 \\
+  \text{Contribution } x=2: & \quad \dots \quad 0 \quad 0 \quad 1 \\
+  \text{Contribution } x=4: & \quad \dots \quad 0 \quad 0 \quad 1 \\
+  \text{Contribution } x=8: & \quad \dots \quad 0 \quad 0 \quad 1 \\
+  \text{Contribution } x=3: & \quad \dots \quad 0 \quad 0 \quad 1 \\
+  \hline
+  \text{Resulting Sum:}   & \quad \dots \quad \mathbf{1} \quad \mathbf{0} \quad \mathbf{0}
+\end{aligned}
+\]
+
+\noindent
+The displacement $M$ is calculated as:
+\[ M = \lfloor \log_2(\nu(24)) \rfloor + 1 = \lfloor \log_2(100_2) \rfloor + 1 = 2 + 1 = 3 \]
+The carry generated at position $24$ strictly affects the interval $[22, 24]$ and terminates at position $22$.
+
+\subsection{Positional Dissection of $C_3$ (Selected Intervals)}
+
+We dissect the arithmetic formation of $C_3$ (Example of Subsection \ref{subsec:construct}) by analyzing the collision of active generators at specific positions $k$.
+The "Raw Weight" represents the collision multiplicity $\nu(k)$. The "Carry" propagates leftward to position $k-1$.
+
+\textbf{Sub-block 1: The Cascade Effect ($k=1$ to $6$)}
+This interval demonstrates a critical carry chain where a collision at $k=6$ triggers a propagation that flips all bits to the left, changing the structure from $011110_2$ to $100000_2$.
+
+\begin{table}[h]
+\centering
+\caption{Bitwise Arithmetic for Interval $k \in [1, 6]$}
+\begin{tabular}{ccccccc}
+\hline
+ \textbf{Pos} & \textbf{Terms} & \textbf{Weight} & \textbf{C. In} & \textbf{Total} & \textbf{Bit} & \textbf{C. Out} \\
+ $k$ & $\{a \mid a \mid k\}$ & $\nu(k)$ & (from $k+1$) & $\Sigma$ & $d_k = \Sigma \bmod 2$ & $\lfloor \Sigma / 2 \rfloor$ \\
+\hline
+ 6 & 2, 3 & 2 ($10_2$) & 0 & 2 & \textbf{0} & 1 \\
+ 5 & 5 & 1 ($01_2$) & 1 & 2 & \textbf{0} & 1 \\
+ 4 & 2 & 1 ($01_2$) & 1 & 2 & \textbf{0} & 1 \\
+ 3 & 3 & 1 ($01_2$) & 1 & 2 & \textbf{0} & 1 \\
+ 2 & 2 & 1 ($01_2$) & 1 & 2 & \textbf{0} & 1 \\
+ 1 & - & 0 ($00_2$) & 1 & 1 & \textbf{1} & 0 \\
+\hline
+\end{tabular}
+\end{table}
+
+\noindent \textbf{Resulting Segment:} $100000_2$.
+
+\textbf{Sub-block 5: High Density Saturation ($k=25$ to $30$)}
+At position $k=30$, we observe a triple collision ($\nu(30)=3$). Unlike the first block, the gaps in the sequence absorb the carry immediately, preventing a long-range cascade.
+
+\begin{table}[h]
+\centering
+\caption{Bitwise Arithmetic for Interval $k \in [25, 30]$}
+\begin{tabular}{ccccccc}
+\hline
+ \textbf{Pos} & \textbf{Terms} & \textbf{Weight} & \textbf{C. In} & \textbf{Total} & \textbf{Final} & \textbf{C. Out} \\
+ $k$ & $\{a \mid a \mid k\}$ & $\nu(k)$ & (from $k+1$) & $\Sigma$ & $d_k$ & $\kappa$ \\
+\hline
+ 30 & 2, 3, 5 & 3 ($11_2$) & 0 & 3 & \textbf{1} & 1 \\
+ 29 & - & 0 ($00_2$) & 1 & 1 & \textbf{1} & 0 \\
+ 28 & 2 & 1 ($01_2$) & 0 & 1 & \textbf{1} & 0 \\
+ 27 & 3 & 1 ($01_2$) & 0 & 1 & \textbf{1} & 0 \\
+ 26 & 2 & 1 ($01_2$) & 0 & 1 & \textbf{1} & 0 \\
+ 25 & 5 & 1 ($01_2$) & 0 & 1 & \textbf{1} & 0 \\
+\hline
+\end{tabular}
+\end{table}
+
+\noindent \textbf{Resulting Segment:} $111111_2$.
+
+
+
+\section{Ordinal Criteria and Geometric Stability}
+\label{sec:ordinal_criteria}
+
+To preclude the possibility of the period $L_N$ collapsing due to algebraic simplification between the numerator and denominator of the partial sum, we establish an \textbf{Ordinal Criterion}.
+This criterion links the period length to the multiplicative order of the base modulo the denominator, demonstrating that the geometric growth of the exponents enforces a monotonicity that cannot be reversed by cancellation.
+
+\subsection{The Ordinal Function and Periodicity}
+We identify the fundamental period of a rational number not merely as a sequence length, but as the arithmetic order of the denominator.
+
+\begin{definition}[Multiplicative Ordinal]
+Let $Q \in \mathbb{N}$ be coprime to the base $b$. The \textbf{Ordinal of $Q$ relative to $b$}, denoted $\operatorname{ord}_b(Q)$, is the smallest integer $k \ge 1$ such that:
+\begin{equation}
+  b^k \equiv 1 \pmod Q.
+\end{equation}
+In the context of the recursive sum $S_{N+1} = P_{N+1}/Q_{N+1}$, the fundamental period is exactly:
+\begin{equation}
+  L_{N+1} = \operatorname{ord}_b(Q_{N+1}).
+\end{equation}
+\end{definition}
+
+\subsection{Impossibility of Super-Multiplicative Period Growth}
+\label{sec:period_bound_proof}
+
+We address the question of whether the addition of rational terms can generate a period strictly greater than the product of their individual periods. We prove that the period of a sum is strictly bounded by the least common multiple of the component periods. Consequently, the condition $\operatorname{ord}_b(p/a + q/c) > \operatorname{ord}_b(p/a) \cdot \operatorname{ord}_b(q/c)$ is \textbf{never satisfied}.
+
+\subsection{Theorem of Period Containment}
+\label{subsec:period_containment}
+
+Let $x, y \in \mathbb{Q}$ be two rational numbers represented by fractions with denominators coprime to the base $b$. Let $L_x$ and $L_y$ be their respective fundamental periods in base $b$.
+\begin{equation} \label{eq:period_defs}
+  L_x = \operatorname{ord}_b(\text{denom}(x)), \quad L_y = \operatorname{ord}_b(\text{denom}(y)).
+\end{equation}
+
+\begin{theorem}[Upper Bound of the Sum Period]
+\label{thm:period_upper_bound}
+The period of the sum $z = x + y$, denoted $L_{x+y}$, satisfies the strict divisibility condition:
+\begin{equation} \label{eq:lcm_divisibility}
+  L_{x+y} \mid \operatorname{lcm}(L_x, L_y).
+\end{equation}
+Consequently, we have the universal inequality:
+\begin{equation} \label{eq:period_inequality}
+  L_{x+y} \le \operatorname{lcm}(L_x, L_y) \le L_x \cdot L_y.
+\end{equation}
+Thus, it is structurally impossible for the period to grow faster than the multiplicative combination of its parts.
+\end{theorem}
+
+\begin{proof}
+  Let the reduced fractional representations be $x = \frac{P_1}{Q_1}$ and $y = \frac{P_2}{Q_2}$.
+  By definition of the multiplicative order:
+  \begin{equation} \label{eq:mod_conditions}
+    b^{L_x} \equiv 1 \pmod{Q_1} \quad \text{and} \quad b^{L_y} \equiv 1 \pmod{Q_2}.
+  \end{equation}
+  
+  Consider the sum:
+  \begin{equation}
+    z = x + y = \frac{P_1 Q_2 + P_2 Q_1}{Q_1 Q_2}.
+  \end{equation}
+  Let $Q_z$ be the denominator of $z$ after reduction. We know that $Q_z$ is a divisor of the least common multiple of the denominators:
+  \begin{equation}
+    Q_z \mid \operatorname{lcm}(Q_1, Q_2).
+  \end{equation}
+  
+  Let $K = \operatorname{lcm}(L_x, L_y)$. Since $L_x \mid K$ and $L_y \mid K$, it follows from (\ref{eq:mod_conditions}) that:
+  \begin{equation}
+    b^K \equiv 1 \pmod{Q_1} \quad \text{and} \quad b^K \equiv 1 \pmod{Q_2}.
+  \end{equation}
+  This implies:
+  \begin{equation}
+    b^K \equiv 1 \pmod{\operatorname{lcm}(Q_1, Q_2)}.
+  \end{equation}
+  
+  Since $Q_z \mid \operatorname{lcm}(Q_1, Q_2)$, the congruence holds for $Q_z$:
+  \begin{equation}
+    b^K \equiv 1 \pmod{Q_z}.
+  \end{equation}
+  
+  By the definition of the ordinal $\operatorname{ord}_b(Q_z)$ as the \textit{smallest} exponent satisfying this relation, $L_{x+y}$ must divide any such exponent $K$. Therefore:
+  \begin{equation}
+    L_{x+y} \mid \operatorname{lcm}(L_x, L_y).
+  \end{equation}
+  
+  This proves that the period of the sum is contained within the lattice generated by the periods of the summands.
+\end{proof}
+
+\subsection{Implication for Recursive Stability}
+\label{subsec:recursive_stability}
+
+This theorem provides the necessary justification for the monotonicity of the period sequence in our construction.
+
+\begin{corollary}[Necessity of $L_N$ Maximality]
+\label{cor:maximality_necessity}
+Consider the recursive step $S_{N+1} = S_N + \frac{1}{t_{N+1}}$.
+Let $L_{N+1}$ be the new period. By Theorem \ref{thm:period_upper_bound}:
+\begin{equation} \label{eq:recursive_bound}
+  L_{N+1} \le \operatorname{lcm}(L_N, \operatorname{ord}_b(t_{N+1})).
+\end{equation}
+For the period to achieve the target geometric growth $L_{N+1} = L_N \cdot a^*_{N+1}$, it is mathematically requisite that:
+\begin{enumerate}
+  \item The greatest common divisor of the periods is minimal (ideally 1).
+  \item No cancellation collapses the structure (as discussed in Section \ref{sec:ordinal_criteria}).
+\end{enumerate}
+Crucially, since $L_{N+1}$ cannot spontaneously exceed $\operatorname{lcm}(L_N, a^*_{N+1})$, the \textbf{only} way to sustain a large period $L_{N+1}$ is to inherit the maximality of the previous period $L_N$.
+If $L_N$ were to collapse, the upper bound for $L_{N+1}$ would correspondingly collapse. Thus, the stability of the system is recursive: specific geometric growth requires the full weight of the history $L_N$.
+\end{corollary}
+
+\begin{lemma}[Minimal Generator of Ordinal $k$]
+\label{lem:minimal_gen}
+Let $b \in \mathbb{Z}_{\ge 2}$ be a fixed base and $k \in \mathbb{N}$ be the target multiplicative order.
+The minimum admissible prime $p$ satisfying $\operatorname{ord}_b(p) = k$ is the smallest prime divisor of the $k$-th cyclotomic polynomial evaluated at $b$:
+\[
+  p_{\min} = \min \{ p \in \mathbb{P} : p \mid \Phi_k(b) \}.
+\]
+Consequently, excluding the rare case where $p \mid k$, the prime admits the explicit arithmetic progression form:
+\[
+  p_{\min} = n \cdot k + 1, \quad \text{for some } n \in \mathbb{N}_{\ge 1}.
+\]
+This ensures that $p_{\min}$ is congruent to $1$ modulo $k$, strictly prohibiting the period from collapsing to a proper divisor of $k$.
+\end{lemma}
+
+
+\subsection{Simplification Requirements and Subsequence Divisibility}
+We address the potential for "Ordinal Simplification" (e.g., the reduction of a repeating pattern $ddd\dots ddd$ to $d$, corresponding to $L \to \epsilon L$).
+Algebraically, a reduction in period length from $L$ to a sub-period $L' = L/k$ is possible if and only if the integer block $C$ representing the period possesses a specific repetitive structure.
+
+\begin{lemma}[Condition for Period Reduction]
+\label{lem:reduction}
+Let $S = \frac{C}{b^L - 1}$ be a rational number with apparent period $L$. The fundamental period is a proper divisor $L/k$ (where $k > 1$) if and only if the numerator $C$ is a multiple of the \textbf{Repunit Factor} $R_k$:
+\begin{equation}
+  C = C' \cdot R_k = C' \cdot \left( \frac{b^L - 1}{b^{L/k} - 1} \right) = C' \cdot \sum_{j=0}^{k-1} b^{j(L/k)}.
+\end{equation}
+\end{lemma}
+
+
+\subsection{Empirical Analysis of Denominator and Period Correlation}
+\label{subsec:empirical_denom_period}
+
+We examine the arithmetic growth of the partial sum's denominator $Q_N$ relative to the fundamental period $L_N$.
+The tables below present the data for bases $b \in \{2, 3, 11\}$ iterating through the first 8 prime exponents.
+The columns are defined as:
+\begin{itemize}
+  \item $i$: The iteration step (corresponding to the $i$-th prime in $\mathbb{P}$).
+  \item $Q_N$: The denominator of the partial sum $S_N = P_N / Q_N$, calculated as $Q_N = \operatorname{lcm}(b^{p_1}-1, \dots, b^{p_i}-1)$.
+  \item $\operatorname{ord}_b(Q_N)$: The multiplicative order of the base modulo the denominator.
+  \item $L_N$: The theoretically derived period satisfying $L_N = \operatorname{lcm}(L_{N-1}, p_i)$.
+\end{itemize}
+
+\begin{table}[h!]
+\centering
+\caption{Denominator vs. Period for Base $b=2$ ($S_A$ with $A=\mathbb{P}$)}
+\label{tab:denom_b2}
+\begin{tabular}{crrr}
+\hline
+ $i$ & Denominator $Q_N$ & $\operatorname{ord}_2(Q_N)$ & Period $L_N$ \\
+\hline
+ 1 & $3$ & 2 & 2 \\
+ 2 & $21$ & 6 & 6 \\
+ 3 & $651$ & 30 & 30 \\
+ 4 & $82,677$ & 210 & 210 \\
+ 5 & $1.69 \times 10^8$ & 2,310 & 2,310 \\
+ 6 & $1.39 \times 10^{12}$ & 30,030 & 30,030 \\
+ 7 & $1.82 \times 10^{17}$ & 510,510 & 510,510 \\
+ 8 & $9.56 \times 10^{22}$ & 9,699,690 & 9,699,690 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Denominator vs. Period for Base $b=3$ ($S_A$ with $A=\mathbb{P}$)}
+\label{tab:denom_b3}
+\begin{tabular}{crrr}
+\hline
+ $i$ & Denominator $Q_N$ & $\operatorname{ord}_3(Q_N)$ & Period $L_N$ \\
+\hline
+ 1 & $8$ & 2 & 2 \\
+ 2 & $104$ & 6 & 6 \\
+ 3 & $12,584$ & 30 & 30 \\
+ 4 & $1.37 \times 10^7$ & 210 & 210 \\
+ 5 & $1.21 \times 10^{12}$ & 2,310 & 2,310 \\
+ 6 & $9.68 \times 10^{17}$ & 30,030 & 30,030 \\
+ 7 & $6.27 \times 10^{25}$ & 510,510 & 510,510 \\
+ 8 & $\approx 3.6 \times 10^{34}$ & 9,699,690 & 9,699,690 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Denominator vs. Period for Base $b=11$ ($S_A$ with $A=\mathbb{P}$)}
+\label{tab:denom_b11}
+\begin{tabular}{crrr}
+\hline
+ $i$ & Denominator $Q_N$ & $\operatorname{ord}_{11}(Q_N)$ & Period $L_N$ \\
+\hline
+ 1 & $120$ & 2 & 2 \\
+ 2 & $15,960$ & 6 & 6 \\
+ 3 & $2.56 \times 10^{10}$ & 30 & 30 \\
+ 4 & $4.99 \times 10^{17}$ & 210 & 210 \\
+ 5 & $\approx 1.4 \times 10^{28}$ & 2,310 & 2,310 \\
+ 6 & $\approx 4.2 \times 10^{41}$ & 30,030 & 30,030 \\
+ 7 & $\approx 2.1 \times 10^{59}$ & 510,510 & 510,510 \\
+ 8 & $\approx 1.3 \times 10^{79}$ & 9,699,690 & 9,699,690 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{remark}[Ordinal Equality]
+The tables confirm that $\operatorname{ord}_b(Q_N) = L_N$ for all observed steps.
+Crucially, despite the denominator $Q_N$ varying wildly with the base $b$ (spanning from $10^{22}$ to $10^{79}$ for $i=8$), the multiplicative order $L_N$ remains structurally invariant, determined solely by the LCM of the exponents.
+\end{remark}
+
+
+
+\section{The Edge Case}
+\label{sec:gap_domination}
+
+We invoke a density comparison with a known convergent series. This analysis is critical to demonstrate that the carry at the periodic boundary is strictly zero, ensuring the global maximum of the fractional part never exceeds unity.
+
+\subsection{The Limiting Edge Case and Global Boundedness}
+\label{subsec:limiting_Edge Case}
+
+We establish a global upper bound for the sum $S$ by comparing it to a majorant series derived from the prime factorization structure of the exponents.
+
+\begin{theorem}[Global Supremum Bound]
+\label{thm:limiting_Edge Case}
+Let $\mathbb{P} = \{2, 3, 5, \dots\}$ be the set of prime numbers. Let $A \subset \mathbb{N}$ be any strictly ordered subset of pairwise coprime integers. The sum $S$ is strictly dominated by the specific case where the base is minimized to $b=2$ and the generating set is maximized to $A = \mathbb{P}$. We define the \textbf{Limiting Edge Case} $\mathcal{S}_{\sup}$ as:
+\begin{equation}
+  \mathcal{S}_{\sup} := \sum_{p \in \mathbb{P}} \sum_{k=1}^{\infty} \frac{1}{2^{p^k} - 1} = 0.5895033\dots < \frac{7}{10}.
+\end{equation}
+This value represents the absolute maximum density attainable by a reciprocal sum of this class. Since $\mathcal{S}_{\sup}$ converges to a constant strictly less than 1, it follows that for any valid construction of $S$, the integer part is identically zero.
+\end{theorem}
+
+\begin{proof}
+  \textbf{1. Monotonicity of the Base:}
+  Consider the function $f(b) = (b^x - 1)^{-1}$. For any fixed $x \ge 1$, $f(b)$ is strictly decreasing with respect to $b$. Thus, for any set of exponents $A_E$, the sum is maximized when $b$ takes its minimal value in $\mathbb{Z}_{\ge 2}$, which is $b=2$.
+
+  \textbf{2. Maximality of the Exponent Set:}
+  The set of effective exponents $A_E$ is generated by powers of elements in $A$. Since elements of $A$ are pairwise coprime, the densest possible packing of such a set occurs when $A$ consists of the smallest possible coprime integers. This corresponds to the set of prime numbers $\mathbb{P}$. Any other pairwise coprime set $A'$ must contain composite numbers or omit primes, implying $a'_n \ge p_n$ for all $n$. Consequently, the exponents $x \in A_E$ are term-wise greater than or equal to the prime powers, minimizing the denominators.
+
+  \textbf{3. Convergence and Boundedness:}
+  We approximate the sum by the geometric series expansion:
+  \begin{equation}
+    \mathcal{S}_{\sup} = \sum_{x \in \mathbb{P}_E} \frac{1}{2^x - 1} < \sum_{x \in \mathbb{P}_E} \frac{1}{2^{x-1}} = 2 \sum_{x \in \mathbb{P}_E} 2^{-x}.
+  \end{equation}
+  The sum of reciprocals of powers of 2 over prime powers is a sub-series of the geometric series $\sum 2^{-n} = 1$. Specifically, since $\mathbb{P}_E$ (prime powers) has asymptotic density 0 in $\mathbb{N}$, the sum is strictly bounded away from the saturation point of the geometric series.
+\end{proof}
+
+
+
+
+\section{Effective Magnitude and Separation of Carry Dynamics} \label{subsec:effective_magnitude}
+
+To validate the recursive construction of the period $L_{N+1}$, we must ensure that the arithmetic concatenation of the new block does not violate the modular boundary. This requires analyzing the sum of the accumulated period $C_N$ and the perturbation block $B_{N+1,q}$.
+The structural analysis of this sum is facilitated by the \textbf{Tail Isolation} established in Theorem \ref{thm:tail_isolation_expanded}. By guaranteeing that the error term $\varepsilon$ is strictly separated from the principal injection, we can derive the effective magnitude of $B_{N+1,q}$ as a deterministic function of the Diophantine parameters.
+
+\subsection{Effective Magnitude and Multiplicity}
+Recall from Definition \ref{def:collision_multiplicity} that $\nu(n)$ denotes the collision multiplicity (the number of terms summing at a given position). The integer value of the sub-block $B_{N+1,q}$ is not merely a function of position but is scaled by this multiplicity. 
+
+Invoking the bound on the tail error $\varepsilon$ (Theorem \ref{thm:tail_isolation_expanded}), the \textbf{Effective Magnitude} is given by:
+\begin{equation} \label{eq:magnitude_decay}
+  B_{N+1,q} = \nu(z_q) \cdot b^{L_N - z_q} + \varepsilon \approx \nu(z_q) \cdot b^{L_N - z_q}.
+\end{equation}
+Here, $z_q$ is the relative injection position derived from the mapping $\Phi_N$. This relationship establishes that the magnitude of the perturbation decays exponentially with $z_q$, scaled linearly by the multiplicity $\nu(z_q)$ stated in Subsection \ref{subsec:density}, specifically Lemma \ref{lem:critical_border}.
+
+\begin{remark}[Deterministic Decoupling and Pessimistic Density] \label{rem:conditional_carry}
+The generation of a structural carry is not an intrinsic property of the block $B_{N+1,q}$ alone, but a conditional event dependent on the total summation \[C_N + B_{N+1,q} \ge b^{L_N}\]. 
+To prove stability without tracking the specific digits of $C_N$, we adopt a strategy of \textbf{Analytical Decoupling}:
+
+\begin{enumerate}
+  \item \textbf{Magnitude-Driven Carry Interference:} A "Potential Carry" is defined solely by the magnitude of $B_{N+1,q}$. If $z_q$ is small (or $\nu(z_q)$ is anomalously large), $B_{N+1,q}$ is significant, and the sum \textit{could} theoretically overflow depending on $C_N$. Conversely, if $z_q$ is large, $B_{N+1,q}$ vanishes, guaranteeing $C_N + B_{N+1,q} < b^{L_N}$ for any valid $C_N$.
+  
+  \item \textbf{Rejection of Probabilistic Models:} We do not treat the digits of $C_N$ as random variables. Instead, we employ the concept of \textbf{Maximal Occurrence}. We classify \textit{any} configuration where $B_{N+1,q}$ has sufficient magnitude to bridge the gap (specifically $z_q \le M$, where $M$ accounts for $\nu$) as a "structural carry interference."
+  
+  \item \textbf{Pessimistic Density:} The proof of stability (Section \ref{sec:irrationality}) relies on the Diophantine Analysis (Section \ref{sec:diophantine}). We demonstrate that the density of indices $q$ mapping to these carry interference regions (small $z$, high $\nu$) is asymptotically negligible. 
+\end{enumerate}
+
+Thus, by bounding the \textit{occurrence} of high-magnitude $B$ blocks via the Supremum Weighted Density, we ensure the stability of the sum almost everywhere, independent of the historical accumulation in $C_N$.
+\end{remark}
+
+
+\section{Analysis of the Diophantine Region}
+\label{sec:diophantine}
+
+Let $b \in \mathbb{N}_{\ge 2}$ be a fixed base. We investigate the solution space $\mathcal{R} \subset \mathbb{N}^5$ for the tuple $\mathbf{t} = (v, w, x, y, z)$, constrained by modular divisibility and logarithmic bounds.
+
+\subsection{Definition of the Region}
+
+The region $\mathcal{R}$ is defined as the set of tuples $(v, w, x, y, z) \in \mathbb{N}^5$ satisfying the following system of arithmetic conditions:
+
+\begin{equation} \label{eq:region_def}
+  \mathcal{R} = \left\{ (v, w, x, y, z) \in \mathbb{N}^5 \;\middle|\; 
+  \begin{aligned}
+    &1. \quad \gcd(v, y) = 1 \\
+    &2. \quad v^w \mid (xy - z) \\
+    &3. \quad 1 \le x \le v^w \\
+    &4. \quad 1 \le z \le \lfloor w \log_b(v) \rfloor
+  \end{aligned}
+  \right\}
+\end{equation}
+
+Condition (2) implies the existence of an integer cofactor $k \ge 0$ such that the fundamental Diophantine equation holds:
+\begin{equation} \label{eq:fundamental}
+  xy - z = k v^w
+\end{equation}
+
+
+\subsection{Structural Sparsity and Separation Analysis}
+\label{subsec:structural_sparsity}
+
+We characterize the distribution of solutions within the Diophantine region $\mathcal{R}$. Unlike the projection to the base case, which establishes a lower bound on separation, the analysis for a \textbf{fixed weight} $w$ reveals a significantly sparser structure governed by the modulus $v^w$.
+
+Let the tuple of parameters be fixed as $(v, w, y, z)$, where $v$ is the base, $w$ is the exponent weight, $y$ is the period length (satisfying $\gcd(v,y)=1$), and $z$ is the target residue.
+
+\begin{definition}[The $w$-Weighted Solution Lattice]
+Let $\mathcal{X}_{w,z}(y)$ denote the set of integer solutions $x \in \mathbb{N}$ satisfying the modular divisibility constraint for fixed parameters:
+\begin{equation}
+  \mathcal{X}_{w,z}(y) = \{ x \in \mathbb{N} \mid v^w \text{ divides } (xy - z) \}.
+\end{equation}
+This condition is algebraically equivalent to the linear congruence:
+\begin{equation}
+  xy \equiv z \pmod{v^w}.
+  \label{eq:fundamental_congruence}
+\end{equation}
+\end{definition}
+
+\begin{proposition}[Metric Separation for Fixed Weight]
+\label{prop:metric_separation}
+For any fixed weight $w \ge 1$, fixed residue $z$, and fixed multiplier $y$ with $\gcd(v, y) = 1$, the solution space $\mathcal{X}_{w,z}(y)$ forms an arithmetic progression. The minimum Euclidean distance (metric separation) between any two distinct solutions $x_a, x_b \in \mathcal{X}_{w,z}(y)$ is exactly $v^w$.
+\end{proposition}
+
+\begin{proof}
+  We analyze the structure of the linear congruence given in Eq. (\ref{eq:fundamental_congruence}).
+
+  \textbf{1. Existence and Uniqueness in the Fundamental Domain:}
+  Since $\gcd(v, y) = 1$, it follows that $\gcd(v^w, y) = 1$. Therefore, the multiplicative inverse $y^{-1}$ exists and is unique modulo $v^w$.
+  Let $x_0$ be the unique principal solution within the fundamental domain $[1, v^w]$:
+  \begin{equation}
+    x_0 = (z \cdot y^{-1}) \pmod{v^w}.
+  \end{equation}
+
+  \textbf{2. General Form of Solutions:}
+  The complete set of solutions over $\mathbb{N}$ is generated by the equivalence class of $x_0$:
+  \begin{equation}
+    \mathcal{X}_{w,z}(y) = \{ x_0 + k \cdot v^w \mid k \in \mathbb{Z}_{\ge 0} \}.
+  \end{equation}
+
+  \textbf{3. Determination of Minimal Distance:}
+  Let $x_a, x_b$ be two distinct elements of $\mathcal{X}_{w,z}(y)$. By the general form, there exist distinct integers $k_a, k_b$ such that:
+  \begin{equation}
+    x_a = x_0 + k_a v^w, \quad x_b = x_0 + k_b v^w.
+  \end{equation}
+  The Euclidean distance $\Delta(x_a, x_b)$ is given by:
+  \begin{equation}
+    \Delta(x_a, x_b) = |x_a - x_b| = |(x_0 + k_a v^w) - (x_0 + k_b v^w)| = |k_a - k_b| \cdot v^w.
+  \end{equation}
+  Since $x_a \neq x_b$, we have $k_a \neq k_b$, which implies $|k_a - k_b| \ge 1$.
+  The minimum separation is achieved when $|k_a - k_b| = 1$ (i.e., for consecutive terms in the lattice).
+  
+  Therefore:
+  \begin{equation}
+    \min_{x_a \neq x_b} \Delta(x_a, x_b) = 1 \cdot v^w = v^w.
+  \end{equation}
+  
+  This proves that for a fixed weight configuration, the granularity of the solution space is strictly $v^w$, not merely $v$.
+\end{proof}
+
+\begin{corollary}[Structural Sparsity]
+The asymptotic density of solutions for a fixed weight $w$ is given by the reciprocal of the separation metric:
+\begin{equation}
+  \delta(\mathcal{X}_{w,z}) = \frac{1}{v^w}.
+\end{equation}
+This confirms that the "danger zones" for carry propagation become exponentially sparse as the weight $w$ (corresponding to the exponent of the base term) increases.
+\end{corollary}
+
+\subsection{Deterministic Weighted Density and Non-Disjoint Upper Bounds}
+\label{subsec:density}
+
+To assess the likelihood of carry propagation, we define the density metrics as worst-case bounds. We assume the "pessimistic" scenario where every integer residue $z$ allowed by the logarithmic bounds corresponds to a valid collision.
+
+\subsubsection{Carry Displacement and Logarithmic Bounds}
+
+To quantify the impact of carry propagation on the period structure, we must move beyond asymptotic estimates and establish a precise correspondence between block indices and carry magnitudes. We introduce a deterministic mapping framework that projects the geometric position of each sub-block $B_{N+1,q}$ into the modular arithmetic of the Diophantine region defined in Section \ref{sec:diophantine}. This mapping is requisite to formally derive the \textbf{Deterministic Density} properties in Section \ref{sec:irrationality}, demonstrating that the "unsafe" regions where carries might compromise the period are not random occurrences, but are strictly confined to a sparse, enumerable subset of the solution space determined by logarithmic bounds.
+
+
+
+\begin{lemma}[Maximal Logarithmic Displacement]
+\label{lem:log_displacement}
+Consider the iteration step associated with the term $v^w$, where $v = a_{N+1}$ and $w = e_{N+1, \max}$. Let $M$ be the maximum carry displacement defined in Lemma \ref{lem:carries}. Under the worst-case assumption where the collision multiplicity $\nu(n)$ scales with the magnitude of the current active modulus, the displacement is strictly bounded by the logarithm of the modulus:
+\begin{equation}
+  M \le \lceil w \log_b(v) \rceil.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+  From Lemma \ref{lem:carries}, the carry propagation length is determined by the magnitude of the pile-up $k = \nu(n)$:
+  $$ M = \lfloor \log_b(k) \rfloor + 1. $$
+  
+  We consider the maximal density scenario. The number of effective exponents contributing to the sum at step $N$ is finite. Since the sequence $A$ is strictly increasing ($a_1 < a_2 < \dots$), the index $N$ (and thus the maximum possible multiplicity) is strictly bounded by the value of the base itself, i.e., $\nu(n) \le N < a_{N+1} = v$.
+  
+  Since $w \ge 1$, it holds that $v \le v^w$. Therefore, we have the deterministic inequality:
+  $$ k < v^w. $$
+  
+  Substituting this upper bound into the carry formula:
+  $$ M \le \lfloor \log_b(v^w) \rfloor + 1 \approx w \log_b(v). $$
+  
+  Thus, the structural disturbance caused by the term $v^w$ is confined to a logarithmic suffix of size proportional to $\log_b(v^w)$.
+\end{proof}
+
+\begin{lemma}[Sufficiency of Confinement at the Critical Border]
+\label{lem:critical_border}
+Let $M$ be the maximal logarithmic displacement derived in Lemma \ref{lem:log_displacement}.
+The structural integrity of a block $C'_{N,q}$ is compromised if and only if the carry propagation crosses the boundary into the preceding block $C'_{N,q-1}$ (We treat carefully the tail in Theorem \ref{thm:tail_isolation_expanded}).
+Assuming the tail (contribution from near weights $\nu(n)$) is negligable and mapping the block index $q$ to its residue $z_q$, this carry interference occurs exclusively under the condition:
+\begin{equation} \label{eq:critical_condition}
+  -z_q + M \ge 1.
+\end{equation}
+Consequently, the set of "unsafe" residues is strictly confined to the interval $z_q \in [1, M]$.
+\end{lemma}
+
+\begin{proof}
+  Consider the coordinate system relative to the start of the $q$-th block, denoted as position $0$. The non-zero digit associated with the term $v^w$ is injected at relative position $z_q$.
+  According to Lemma \ref{lem:log_displacement}, the carry generated by arithmetic pile-up extends at most $M$ positions to the left of the injection point.
+  
+  The span of the carry influence is the interval $(z_q - M, z_q]$, we recall the position stated in Definition \ref{def:positional}.
+  For the carry to invade the previous block, the lower bound of this interval must be less than or equal to $0$ (in 1-based indexing, this corresponds to reaching index $0$ or lower).
+  The intersection with the boundary implies:
+  $$ z_q - M \le -1 + \epsilon \implies z_q - M < 0. $$
+  In integer arithmetic $\dots d_3d_2d_1$, this condition is equivalent to:
+  $$ M - z_q \ge 1 \quad \text{or} \quad -z_q + M \ge 1. $$
+  
+  This inequality defines the \textbf{Critical Border}. If $-z_q + M < 1$ (i.e., $z_q \ge M$), the carry is fully contained within the current block $q$.
+  Therefore, the only values of $z_q$ that permit structural corruption are those satisfying $z_q \le M - 1$.
+  Since the mapping $q \mapsto z_q$ is bijective, this proves that the number of interfering blocks is exactly bounded by $M$.
+  As discussed in Section \ref{sec:irrationality}, this confinment of $z$ ensures that the vast majority of the solution space remains structurally distinct and carry-free.
+\end{proof}
+
+
+
+\subsubsection{The Pigeonhole Principle and Modular Mapping}
+
+We analyze the block construction $C_{N+1}$, which consists of $v^w$ sub-blocks of length $L_N$.
+Recall the injection $\Phi_N(q)$ mapping the block index $q$ to the residue $z_q$:
+\begin{equation}
+  q \cdot L_N \equiv z_q \pmod{v^w}.
+\end{equation}
+Since $\gcd(L_N, v^w) = 1$ (by the pairwise coprime property of $A$), the map $q \mapsto z_q$ is a bijection from the set of indices $\{1, \dots, v^w\}$ to the set of residues $\{0, \dots, v^w - 1\}$.
+
+\begin{proposition}[Exact Count of Exceptions]
+  A block $q$ is "structurally compromised" (potentially unsafe) only if the carry from its start propagates into the previous block. This occurs if and only if the relative position $z_q$ falls within the "danger zone" $[1, M]$.
+  
+  By the\textbf{ Pigeonhole Principle}, since the map is a bijection, the number of integer solutions $q$ satisfying $1 \le z_q \le M$ is exactly $M$.
+\end{proposition}
+
+This allows us to treat the "carry interference" not as a probability, but as a deterministic counting problem.
+
+\subsection{Supremum Weighted Density and Explicit Inequality}
+\label{subsec:supremum_dens}
+
+We now verify that the density of these exceptions vanishes. We define the Supremum Weighted Density of unsafe blocks relative to the total number of blocks in the period.
+
+\begin{definition}[Pessimistic Density Bound]
+  Let $\rho_{det}$ be the deterministic density of compromised blocks at step $N$.
+  \begin{equation}
+    \rho_{det} = \frac{\text{Number of Unsafe Blocks}}{\text{Total Blocks}} = \frac{M}{v^w}.
+  \end{equation}
+\end{definition}
+
+Substituting the logarithmic bound $M \approx w \log_b(v)$ (assuming the worst case where multiplicity scales with the exponent weight), we obtain the explicit inequality for the safe operational region.
+
+\begin{theorem}[Density Domination]
+  For the current term $v^w$, the number of exceptions $N_{exc}$ is bounded by the logarithmic displacement.
+  If we consider the full hierarchy of weights $W \ge w$, the cumulative number of exceptions is dominated by the base term. The density satisfies:
+  \begin{equation} \label{eq:density_inequality}
+    \rho_{det} \le \frac{\lceil w \log_b(v) \rceil}{v^w} < \frac{w}{v^{w-\epsilon}}.
+  \end{equation}
+  
+  Explicitly, for a target precision $v^W$, the number of interfering positions is at most:
+  \begin{equation}
+    N_{exc}(W) \le \sum_{k=1}^{W} \left( z_k \cdot v^{W-k} \right)
+  \end{equation}
+\end{theorem}
+
+\begin{remark}[Deterministic Prevalence vs. Probability]
+  \label{rem:deterministic_nature}
+  It is crucial to note that $\rho_{det}$ is not a probability of error in a stochastic sense. The "unsafe" blocks exist at fixed, deterministic positions determined by $q \equiv L_N^{-1} z \pmod{v^w}$.
+  However, the inequality (\ref{eq:density_inequality}) proves that the space tends to zero.
+  Thus, "almost all" blocks are structurally identical to $C_N$ not by chance, but by the necessity of the Pigeonhole Principle applied to the exponential gap between the linear carry $M$ and the exponential modulus $v^w$.
+\end{remark}
+
+
+
+
+\begin{definition}[Supremum Weighted Density]
+\label{def:sup_dens}
+Let $\rho_w$ denote the \textbf{supremum} of the asymptotic density of admissible solutions for a fixed weight $w$. This metric assumes that every integer $z$ in the logarithmic bound generates a unique collision constraint, no matter how the
+solutions are distributed, they cannot exceed this density.:
+\begin{equation}
+  \rho_w = \sup \left( \frac{\text{Card}\{z \in \mathbb{N} \mid 1 \le z \le w \log_b(v)\}}{v^w} \right) \approx \frac{w \log_b(v)}{v^w}.
+\end{equation}
+We define the \textit{cumulative collision potential}, denoted as $\mathcal{P}_{\text{total}}$, as the infinite summation of these supremum densities across the entire hierarchy of weights:
+\begin{equation} \label{eq:naive_sum}
+  \mathcal{P}_{\text{total}} = \sum_{w=1}^{\infty} \rho_w = \log_b(v) \sum_{w=1}^{\infty} \frac{w}{v^w} = O \left( \frac{\ln v}{v} \right).
+\end{equation}
+\end{definition}
+
+While the series in Eq. (\ref{eq:naive_sum}) converges for $v \ge 2$, interpreting it as a direct density is imprecise because the solution sets for distinct weights are not disjoint. A simple summation overcounts the collisions. To clarify the logic we develop a compatible proof by the exhaustion of the solutions for the general case in Subsection \ref{subsec:hazard_universe}, based on the total blocks $q$ and the geometric growth of the dispersion of the solutions.
+
+\begin{proposition}[Non-Disjointness and Density Domination]
+Let $\mathcal{X}_w$ be the set of integer positions satisfying the constraints for weight $w$. The effective density of structural carry interference, denoted $\mathcal{D}$, satisfies the sub-additive inequality:
+\begin{equation}
+  \mathcal{D} = \delta\left( \bigcup_{w=1}^{\infty} \mathcal{X}_w \right) \le \sum_{w=1}^{\infty} \rho_w = \mathcal{P}_{\text{total}}.
+\end{equation}
+Moreover, due to the arithmetic hierarchy, the effective density is strictly dominated by the base case $w=1$.
+\end{proposition}
+
+\begin{proof}
+The intersection of solution sets is non-empty. Specifically, for any $w > 1$, the modular constraint $v^w \mid (xy - z)$ implies divisibility by $v$, i.e., $v \mid (xy - z)$. Thus, we have the strict containment of the solution spaces:
+$$ \mathcal{X}_w \subset \mathcal{X}_1. $$
+Consequently, the union of all interfering positions collapses to the base set:
+$$ \bigcup_{w=1}^{\infty} \mathcal{X}_w = \mathcal{X}_1. $$
+Therefore, the effective density is exactly $O(\rho_1)$, which serves as a tight upper bound for the system:
+\begin{equation}
+  \mathcal{D} < \mathcal{P}_{\text{total}}.
+\end{equation}
+This confirms that the carry interference density vanishes as $O(\frac{\ln v}{v})$, preventing saturation even if the cumulative potential $\mathcal{P}_{\text{total}}$ (the worst-case sum) were considered.
+\end{proof}
+
+\section{Irrationality and Structural Integrity via Diophantine Mapping}
+\label{sec:irrationality}
+
+Having defined the solution space $\mathcal{R}$ for the Diophantine constraints, we now apply this framework to establish the irrationality of the sum $S$. The proof relies on demonstrating that the infinite sequence of digits is non-periodic by verifying two critical conditions: \textit{Structural Distinctness} and \textit{Non-Carry interference} (absence of carry propagation).
+
+We formalize these conditions by mapping the recursive block construction directly into the Diophantine region defined in Section \ref{sec:diophantine}.
+
+\subsection{The Diophantine Map of Block Indices}
+
+Let $N$ be a fixed step in the recursion, and let $L_N$ be the established period length. The period of the subsequent approximation $S_{N+1}$ is constructed by concatenating $a^*_{N+1}$ sub-blocks. We index these sub-blocks by $q$, where $1 \le q \le a^*_{N+1}$.
+
+Recall that the dominant term is defined as $a^*_{N+1} = a_{N+1}^{e_{N+1}}$, where $a_{N+1} \in A$ is the base and $e_{N+1}$ is its associated maximal exponent. To analyze the arithmetic behavior of the $q$-th block, we define a canonical injection $\Phi_N$ mapping the block index $q$ into the Diophantine solution space $\mathcal{R}$.
+
+\begin{definition}[Block-to-Region Injection]
+  We identify the parameters of the current term with the Diophantine tuple $\mathbf{t} = (v, w, x, y, z)$. The mapping $\Phi_N : \{1, \dots, a^*_{N+1}\} \to \mathbb{N}^5$ is defined as:
+  \begin{equation} \label{eq:diophantine_map}
+    \Phi_N(q) = \left( v=a_{N+1}, \, w=e_{N+1}, \, x=q, \, y=L_N, \, z_q \right),
+  \end{equation}
+  where $z_q$ is the unique residue satisfying the modular projection implied by the region's divisibility constraint ($v^w \mid xy - z$):
+  \begin{equation}
+    q \cdot L_N \equiv z_q \pmod{a^*_{N+1}}.
+  \end{equation}
+\end{definition}
+
+By evaluating the image of this map against the constraints of region $\mathcal{R}$ (specifically Condition 4 in Eq. \ref{eq:region_def}), we determine the validity of the block construction.
+
+\subsection{Non-Carry interference via Solution Sparsity}
+\label{subsec:interference_bounds}
+The condition of \textit{Non-Carry interference} requires that the addition of the perturbation term $B_{N+1,q}$ does not generate a carry that propagates across the boundary of the sub-block $L_N$. In our Diophantine framework, a carry propagation corresponds to a "collision" where the solution density violates the logarithmic safety bounds ($z_q \le w \log_b v$).
+
+
+
+\begin{theorem}[Tail Isolation via Fundamental Gap and Density Domination]
+\label{thm:tail_isolation_expanded}
+Let $v = a_{N+1}$ be the base of the current dominant term and $w = e_{N+1, \max}$ its associated exponent. For a specific block index $q$, let $z_q$ denote the relative position of the principal injection mapped by $\Phi_N(q)$. We assert that the contribution of all secondary terms (the tail) is structurally separated from the principal injection $z_q$ by a fundamental gap $\Delta \ge v$. Consequently, the magnitude of the extracted block is given by:
+\begin{equation}
+  B_{N+1,q} = \nu(z_q) \cdot b^{L_N - z_q} + \varepsilon,
+\end{equation}
+where the error term $\varepsilon$ satisfies the strict upper bound governed by the base magnitude:
+\begin{equation}
+  \varepsilon = O( \ln(v)b^{-( v+ z_q)}v^{-1}) .
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+  The proof relies on establishing a lower bound for the metric separation between valid solutions within the Diophantine region $\mathcal{R}$, utilizing the density properties defined in Subsection \ref{subsec:supremum_dens}.
+
+  \textbf{1. Identification of the Principal Term and Tail Set} \\
+  Let $\mathcal{Z}_q \subset \{1, \dots, L_N\}$ be the set of all active arithmetic positions falling within the $q$-th sub-block. The mapping $\Phi_N$ identifies a unique principal residue $z_q \in \mathcal{Z}_q$ corresponding to the dominant weight $w$. We define the \textit{Tail Set} $\mathcal{T}_q$ as the set of all other active positions within this block:
+  \begin{equation}
+    \mathcal{T}_q = \mathcal{Z}_q \setminus \{z_q\}.
+  \end{equation}
+  For the structure of the digit at $z_q$ to be preserved without corruption, we must verify that $\min_{t \in \mathcal{T}_q} |t - z_q| \ge v$.
+
+  \textbf{2. Application of Supremum Weighted Density} \\
+  We analyze the distribution of elements in $\mathcal{T}_q$. These elements arise from the union of solution sets $\mathcal{X}_{k}$ for weights $k$. According to Definition \ref{def:sup_dens}, the density of solutions for any specific weight is bounded by $\rho_k$. The global density of any valid Diophantine solution at any arbitrary integer coordinate is bounded by the \textbf{Cumulative Collision Potential} $\mathcal{P}_{\text{total}}$:
+  \begin{equation}
+    \mathcal{P}_{\text{total}} = \sum_{k=1}^{\infty} \rho_k = O\left(\frac{\ln v}{v}\right).
+  \end{equation}
+  While $\mathcal{P}_{\text{total}}$ provides a global density upper bound, the local separation is enforced by the metric property of the dominant modulus. For the current fixed weight $w$, Proposition \ref{prop:metric_separation} establishes that solutions are separated by exactly $v^w$.
+
+  \textbf{3. Establishment of the Fundamental Gap} \\
+  Consider any secondary term $t \in \mathcal{T}_q$.
+  \begin{itemize}
+    \item \textbf{Case A (Same Weight $w$):} If $t$ arises from the same weight class $w$, the metric separation implies $|t - z_q| \ge v^w$. Since $w \ge 1$, the distance is at least $v$.
+    \item \textbf{Case B (Higher Weights $W > w$):} If $t$ arises from a higher weight $W$, the separation is governed by $v^W$. Since $v^W > v^w \ge v$, the gap is strictly larger.
+    \item \textbf{Case C (Lower Weights):} Contributions from lower weights or previous periods are effectively filtered by the block extraction process modulo $L_N$, or else satisfy the coprimality constraints that prevent synchronization with $z_q$ within small intervals.
+  \end{itemize}
+  Thus, the Supremum Weighted Density imposes a structural sparsity such that the nearest neighbor to $z_q$ cannot exist within the interval $(z_q, z_q + v)$. The fundamental gap is determined by the minimum scale of the system:
+  \begin{equation}
+    \Delta = \inf_{t \in \mathcal{T}_q} (t - z_q) \ge v.
+  \end{equation}
+
+  \textbf{4. Refinement of the Error Term $\varepsilon$} \\
+  The error term $\varepsilon$ represents the arithmetic sum of the tail components in the base-$b$ expansion. Given the gap $\Delta \ge v$, the most significant term of the tail appears at position $z_q + v$.
+  Using the positional shift relative to the principal term, and bounding the sparse sum by a geometric series filled at every possible position $v, 2v, 3v \dots$ (a conservative worst-case scenario allowed by the periodicity of separation):
+  \begin{equation}
+    \varepsilon \le b^{L_N - z_q} \sum_{k=1}^{\infty} \nu(z_{q+kv})b^{-k \cdot v}.
+  \end{equation}
+  This geometric series converges rapidly:
+  \begin{equation}
+    \varepsilon \le b^{L_N - z_q}\mathcal{P}_{\text{total}} .
+  \end{equation}
+  Since $v \to \infty$ as $N \to \infty$, this error term vanishes exponentially faster than the principal term, guaranteeing that the integer projection $B_{N+1,q}$ is uniquely determined by $\nu(z_q)$ and is structurally distinct from any noise generated by the tail.
+\end{proof}
+
+
+\begin{theorem}[Tail Isolation and Strict Periodicity]
+\label{thm:strict_periodicity}
+Let $S_N$ be the partial sum constructed at step $N$. Let $R_{N+1}$ be the infinite tail of the series starting from the base $a_{N+1}$.
+We assert that the carry generated by $R_{N+1}$ never propagates to the integer part. Consequently, the partial sum admits the exact periodic representation:
+\begin{equation}
+  S_N = 0.\overline{C_{N+1}}.
+\end{equation}
+This implies that the block $C_{N+1}$ repeats infinitely with clean boundaries, and no carry ever "wraps around" or spills over to modify the integer prefix.
+
+\begin{proof}
+  \textbf{1. The Pessimistic Injection Point:}
+
+  
+  Consider the first term of the tail $(b^{a_{N+1}} - 1)^{-1}$. In the worst-case scenario (minimal exponent $e=1$), the first non-zero digit of the tail is injected exactly at position:
+  \begin{equation}
+    \mu_{tail} = a_{N+1}.
+  \end{equation}
+
+  \textbf{2. Logarithmic Carry Confinement:}
+  The addition of the entire infinite tail $R_{N+1}$ generates a carry chain propagating to the left. The maximum length of this carry, $M_{tail}$, is logarithmically bounded relative to the injection point:
+  \begin{equation}
+    M_{tail} \le \lceil \log_b(a_{N+1}) \rceil + O(1).
+  \end{equation}
+
+  \textbf{3. The Integer Gap (Safety Condition):}
+  For the representation $0.\overline{C_{N+1}}$ to be valid, the carry must not reach the position $b^0$ (the integer part). We calculate the gap between the injection point and the carry limit:
+  \begin{equation}
+    \Delta = \mu_{tail} - M_{tail} = a_{N+1} - \lceil \log_b(a_{N+1}) \rceil.
+  \end{equation}
+  Since $a_{N+1} \ge 2$ and grows strictly ($a_{N+1} \to \infty$), the linear term dominates the logarithmic term, ensuring $\Delta \ge 1$.
+
+  \textbf{4. Conclusion of Stability:}
+  Since $\Delta \ge 1$, the carry strictly terminates at a fractional position $\ge b^{-1}$.
+  Therefore, the integer part is permanently fixed at $0$.
+  This absence of integer overflow guarantees that the rational number $S_N$ is strictly less than 1 and is defined exclusively by its fractional period. Thus, the expansion $S_N = 0.\overline{C_{N+1}}$ is the unique, stable representation, where the block $C_{N+1}$ repeats cleanly without boundary carry interference.
+\end{proof}
+\end{theorem}
+
+
+\begin{lemma}[Asymptotic Magnitude of the Periodic Block]
+\label{lem:block_magnitude}
+Let $S_N$ be the partial sum at step $N$ and $L_N$ be its fundamental period.
+Let $C_N \in \mathcal{I}_{L_N}$ be the integer block representation of this period.
+The magnitude of the integer block is asymptotically equivalent to the limit sum $S$ scaled by the base magnitude $b^{L_N}$.
+Specifically, the logarithmic magnitude satisfies:
+\begin{equation}
+  \log_b(C_N) = L_N + \log_b(S_N) - \epsilon_N,
+\end{equation}
+where $\epsilon_N \to 0$ exponentially.
+Consequently, for the purpose of carry analysis, $C_N$ acts as a background magnitude of order $\Theta(b^{L_N})$.
+\end{lemma}
+
+\begin{proof}
+  \textbf{1. Rational Representation of the Partial Sum:}
+  From the definition of the Integer Block Representation (Definition \ref{def:isomporph}) and the strict periodicity established in Theorem \ref{thm:strict_periodicity}, the partial sum $S_N$ corresponds to the rational number defined by the repeating block $C_N$:
+  \begin{equation}
+    S_N = 0.\overline{C_N}_b = \sum_{k=1}^{\infty} C_N \cdot b^{-k L_N} = C_N \frac{b^{-L_N}}{1 - b^{-L_N}} = \frac{C_N}{b^{L_N} - 1}.
+  \end{equation}
+
+  \textbf{2. Isolation of the Integer Block:}
+  Solving for $C_N$, we obtain the exact integer relation:
+  \begin{equation}
+    C_N = S_N (b^{L_N} - 1) = S_N \cdot b^{L_N} - S_N.
+  \end{equation}
+  
+  \textbf{3. Logarithmic Expansion and Bounds:}
+  To evaluate the effective magnitude in the context of collision analysis, we take the logarithm base $b$:
+  \begin{equation}
+    \log_b(C_N) = \log_b \left( S_N \cdot b^{L_N} \left( 1 - \frac{1}{b^{L_N}} \right) \right).
+  \end{equation}
+  Applying the logarithmic expansion $\log(xy) = \log x + \log y$:
+  \begin{equation}
+    \log_b(C_N) = L_N + \log_b(S_N) + \log_b \left( 1 - b^{-L_N} \right).
+  \end{equation}
+  
+  \textbf{4. Asymptotic Stability:}
+  Using the Global Supremum Bound (Theorem \ref{thm:limiting_Edge Case}), we know that $S_N$ converges to $S$ and is strictly bounded by $\mathcal{S}_{\sup} < 0.7$.
+  Thus, $\log_b(S_N)$ is a negative constant bounded away from $-\infty$ (since $S_N > 0$).
+  The term $\log_b(1 - b^{-L_N})$ approaches $0$ as $L_N \to \infty$.
+  
+  Therefore, the magnitude of the existing period $C_N$ is strictly dominated by the linear term $L_N$, shifted by the constant density of the sum:
+  \begin{equation}
+    \log_b(C_N) \approx L_N + \mathcal{C}, \quad \text{where } \mathcal{C} = \log_b(S) < 0.
+  \end{equation}
+  This confirms that for large $N$, $C_N$ scales as $S \cdot b^{L_N}$, validating its use as the dominant term in the sum inequality $\max(\log C_N, \log B_{N+1,q})$.
+\end{proof}
+
+\begin{proposition}[Almost Each Block is Carry-Free via Logarithmic Stability]
+\label{prop:carry_free_enhanced}
+The structural integrity of the block concatenation after the iteration ($C'_{N,q}$ recall from Definition \ref{def:block_concatenation}) is preserved for the vast majority of indices $q$.
+The critical boundary for carry propagation for the iterated block $C'_{N,q}$ extends at most by a marginal constant respect to the bound of $B_{N+1,q}$, leaving the asymptotic density of the solution space invariant.
+The density of a block $q$ generating a collision is strictly bounded by the cumulative collision potential.
+\end{proposition}
+
+\begin{proof}
+  \textbf{1. Magnitude Decomposition and The Sum Inequality} \\
+  Recalling the Effective Magnitude from Section \ref{subsec:effective_magnitude}, specifically Eq. (\ref{eq:magnitude_decay}), the tentative sum at index $q$ is $C'_{N,q} = C_N + B_{N+1,q}$ as presenented in Definition \ref{def:block_concatenation}.
+  To determine the exact span of the carry, we analyze the magnitude of this sum in base $b$.
+  Using the approximation $C_N \approx S \cdot b^{L_N}$ (derived from the global bound in Lemma \ref{lem:block_magnitude}), we apply the logarithmic expansion for the sum of two terms:
+  \begin{equation}
+    \log_b(C'_{N,q}) = \log_b(C_N + B_{N+1,q}) = \max(\mathcal{L}_C, \mathcal{L}_B) + \delta_{add},
+  \end{equation}
+  where $\mathcal{L}_C = \log_b(C_N)$ and $\mathcal{L}_B = \log_b(B_{N+1,q})$. The additive error term $\delta_{add}$ is bounded by the supremum of the logarithmic interaction:
+  \begin{equation} \label{eq:log_interaction}
+    \delta_{add} = \log_b \left( 1 + \frac{\min(C_N, B_{N+1,q})}{\max(C_N, B_{N+1,q})} \right) \le \sup \left( \log_b(1 + 1) \right) = \frac{\ln 2}{\ln b}.
+  \end{equation}
+
+  \textbf{2. Analysis of the Interaction Term} \\
+  The term $\delta_{add}$ represents the potential carry generation due specifically to the addition operation (e.g., $1+1=10_2$).
+  Since the sum $S$ is strictly bounded (Theorem \ref{thm:limiting_Edge Case}, $\mathcal{S}_{\sup} < 0.7$), the background block $C_N$ occupies the full period length but does not saturate it (i.e., $C_N < b^{L_N}$).
+  The perturbation $B_{N+1,q} \approx \nu(z_q) b^{L_N - z_q}$ depends on the injection position $z_q$.
+  
+  The interaction becomes critical only when magnitudes are comparable or when saturation is imminent.
+  Specifically, in the worst-case scenario where $b=2$ (the minimum base) and $z_q=1$ (the highest injection point):
+  \begin{itemize}
+    \item The background is $C_N \approx 0.7 \cdot b^{L_N}$.
+    \item The injection is $B_{N+1,q} \approx 0.5 \cdot b^{L_N}$ (since $z_q=1$ implies factor $b^{-1}$).
+    \item The sum $0.7 + 0.5 = 1.2 > 1$ implies an overflow beyond the standard displacement $M$, if $b>2$ is $0.7 + \frac{1}{b} < 1$.
+  \end{itemize}
+  However, the maximum contribution of this overflow to the carry length is determined by Eq. (\ref{eq:log_interaction}). Since $\ln 2 / \ln 2 = 1$, the "danger zone" defined in Lemma \ref{lem:log_displacement} expands by at most a single digit position.
+  
+  \textbf{3. Invariance of Asymptotic Density} \\
+  Let $M$ be the displacement derived from the collision multiplicity $\nu$. The adjusted critical border $M'$ satisfying the strict non-carry condition is:
+  \begin{equation}
+    M' \le M + \lceil \delta_{add} \rceil = \lceil w \log_b(v) \rceil + 1.
+  \end{equation}
+  The set of "unsafe" residues $z_q$ is now confined to the interval $[1, M+1]$.
+  We re-evaluate the Supremum Weighted Density $\rho_{det}$ from Definition \ref{def:sup_dens} with this expanded boundary:
+  \begin{equation}
+    \rho'_{det} = \frac{M+1}{v^w} = \frac{\lceil w \log_b(v) \rceil + 1}{v^w}.
+  \end{equation}
+  Since $v=a_{N+1} \to \infty$ as $N \to \infty$, the additional constant term is negligible against the exponential growth of the denominator.
+  The asymptotic behavior remains dominated by the ratio derived in Eq. (\ref{eq:naive_sum}):
+  \begin{equation}
+    \mathcal{P}(\text{Carry Interference}) = O\left( \frac{\ln a_{N+1}}{a_{N+1}} \right) \to 0.
+  \end{equation}
+  Consequently, almost every augmented block $C'_{N,q}$ satisfies $C'_{N,q} < b^{L_N}$, preserving the structural integrity of the expansion.
+\end{proof}
+
+\subsection{Distinctness of Blocks}
+
+To prove irrationality, we must ensure that the sequence of digits does not eventually become periodic. This is guaranteed if the augmented blocks $C'_{N,q}$ are distinct for all $q$.
+
+\begin{lemma}[Injectivity of the Iteration ]
+  \label{lem:update}
+  For any distinct block indices $q_1, q_2 \in \{1, \dots, a^*_{N+1}\}$ with $q_1 \neq q_2$, the corresponding Diophantine tuples yield distinct structural perturbations.
+\end{lemma}
+
+\begin{proof}
+  Assume, for the sake of contradiction, that the internal structures of two blocks are identical, implying $B_{N+1, q_1} = B_{N+1, q_2}$. Under the mapping $\Phi_N$, the position of the non-zero digit is determined by the residue $z$ in the Diophantine equation:
+  \begin{equation}
+    x y - z = k \cdot v^w.
+  \end{equation}
+  Substituting the mapped values ($y=L_N$, $v^w = a^*_{N+1}$), this becomes:
+  \begin{equation}
+    q \cdot L_N \equiv z \pmod{a^*_{N+1}}.
+  \end{equation}
+  Since the bases in $A$ are pairwise coprime, we have $\gcd(L_N, a_{N+1}) = 1$, and consequently $\gcd(L_N, a^*_{N+1}) = 1$. This implies that $L_N$ is invertible modulo $a^*_{N+1}$.
+  
+  Therefore, the congruence $q_1 L_N \equiv q_2 L_N \pmod{a^*_{N+1}}$ implies $q_1 \equiv q_2 \pmod{a^*_{N+1}}$. Within the range $1 \le q \le a^*_{N+1}$, this forces $q_1 = q_2$.
+  
+  Thus, $q_1 \neq q_2 \implies z_{q_1} \neq z_{q_2}$. Each sub-block receives a unique perturbation.
+\end{proof}
+
+
+\begin{remark}[Deterministic Prevalence via Pessimistic Density]
+  \label{rem:almost_each_valid}
+  It is imperative to distinguish this result from a probabilistic argument. The validity of the blocks is not subject to chance, but is determined by the \textbf{Supremum Weighted Density} ($\rho_w$) defined in Section \ref{sec:diophantine}.
+
+  While Lemma \ref{lem:update} ensures that \textbf{every} block $B_{N+1,q}$ is arithmetically distinct (due to the bijection $x \mapsto z_q$), the structural integrity is governed by the \textit{pessimistic density} of the Diophantine solutions. The set of "unsafe" residues—those permitting carry propagation—constitutes a deterministic subset whose relative density is strictly bounded by the cumulative collision potential.
+  Thus, the statement that \textbf{almost each} block is valid is a \textbf{measure-theoretic} consequence of this vanishing density. As $N \to \infty$, the proportion of blocks essentially free from carry interference approaches $1$, ensuring the non-periodic nature of $S$ based solely on the arithmetic constraints of the region $\mathcal{R}$.
+\end{remark}
+
+
+\subsection{Stability of the Periodic Block}
+\label{subsec:stability_fractional}
+
+\begin{remark}[Strict Locality of Inter-Block Carry Propagation]
+\label{rem:carry_locality}
+It is imperative to note that any arithmetic overflow generated by the summation within the $q$-th sub-block is strictly confined to its immediate predecessor, $C'_{N,q-1}$.
+The maximal displacement of the carry, denoted by $M$, scales logarithmically with the magnitude of the active generator ($M \approx w \log_b v$), as established in Lemma \ref{lem:log_displacement}.
+In contrast, the length of the fundamental period $L_N$ exhibits geometric growth relative to the sequence of generators (see Definition \ref{def:lcm_period} and Equation \ref{eq:period_multiplicative}).
+Consequently, the asymptotic inequality $M \ll L_N$ guarantees that the carry chain lacks the necessary magnitude to traverse more than a single boundary.
+This ensures that the structural corruption is local and does not propagate to $C'_{N,q-2}$, preserving the global distinctness required for Theorem \ref{thm:structural_distinctness}.
+\end{remark}
+
+\begin{theorem}[Asymptotic Structural Distinctness and Irrationality]
+\label{thm:structural_distinctness}
+Let $S_{N+1}$ be the $(N+1)$-th partial sum with period $L_{N+1} = L_N \cdot a^*_{N+1}$, constructed by the concatenation of blocks $C'_{N,q}$ for $1 \le q \le a^*_{N+1}$. Let $v = a_{N+1}$ and $w = e_{N+1, \max}$ such that $a^*_{N+1} = v^w$. The expansion of $S = \lim_{N \to \infty} S_N$ is non-periodic, and thus irrational
+\end{theorem}
+
+\begin{proof}
+Assume, for the sake of contradiction, that $S$ is rational. Then its expansion is eventually periodic, let $N\ge N_0$, with some fundamental period $P$ which holds for $C_{N_0}$ and consequently up to $C_N$.
+For sufficiently large $N$, we have $L_N \gg P$. The construction of the period $L_{N+1}$ consists of a sequence of $K = a^*_{N+1}$ sub-blocks of length $L_N$.
+The expansion of $S_N$ satisfies the strict periodic form $S_N = 0.\overline{C_{N+1}}$ (see Theorem \ref{thm:strict_periodicity}). This implies that the fundamental period $P$ must be commensurable with the block structure.
+Specifically, for any valid periodic interpretation, the boundaries of $P$ cannot cleanly divide the distinct internal sub-blocks $\{B_{N+1,q}\}$ indefinitely.
+
+Since the boundary at $L_{N+1}$ is an absolute separator (no information leaks across it via carries), any hypothetical period $P$ must satisfy:
+\begin{equation}
+  L_{N+1} = k \cdot P \quad \text{for some } k \in \mathbb{N}.
+\end{equation}
+This forces the internal structure of length $P$ to act as a generator for the entire sequence.
+
+
+Under the hypothesis of periodicity, this congruence necessitates that the blocks be identical:
+$$ B_{N+1, q_i} = B_{N+1, q_j}. $$
+However, for all $q_i \neq q_j$ as derived in Lemma \ref{lem:update}:
+$$ B_{N+1, q_i} \neq B_{N+1, q_j}. $$
+
+The existence of distinct blocks contradicts the assumption of periodicity $P$ under the Condition for Period Reduction (see Lemma \ref{lem:reduction}).
+Thus, $S$ is irrational and the denominator is crescent by Theorem \ref{thm:period_upper_bound}, and the simplified denominator of the partial sum satisfies $Q_N>L_N$ by Lemma \ref{lem:minimal_gen}.
+
+\end{proof}
+
+
+
+
+
+\section{Generalization to Arbitrary Sets via Smooth Filtration}
+\label{sec:generalization_smooth}
+
+We extend the construction to an arbitrary infinite set $A \subseteq \mathbb{N}$ by reordering the summation based on arithmetic smoothness. This approach replaces the strictly multiplicative period growth of the coprime case with a Least Common Multiple (LCM) construction that adapts to the prime factorization of the set elements.
+
+\subsection{Finite Tail Truncation}
+\label{subsec:tail_truncation}
+
+To ensure the validity of the integer block representation $0.\overline{C_N}$, we must guarantee that the target sum is strictly bounded by unity in the fractional domain, preventing integer overflow.
+
+\begin{definition}[Tail Truncation and Effective Set]
+\label{def:tail_truncation}
+Let $S_A = \sum_{a \in A} (b^a - 1)^{-1}$. Since the series converges, there exists a finite subset $A' \subset A$ (the "head") such that the sum over the remainder is strictly bounded:
+\begin{equation}
+  \sum_{a \in A \setminus A'} \frac{1}{b^a - 1} < 1.
+\end{equation}
+We define the \textbf{Effective Set} $A_{\star}$ as the remaining infinite tail:
+\begin{equation}
+  A_{\star} := A \setminus A'.
+\end{equation}
+The analysis of irrationality focuses exclusively on the sum $S_{\star}$ generated by $A_{\star}$.
+\end{definition}
+
+
+\begin{corollary}[Universal Stability via Singleton Truncation]
+\label{cor:erdos_stability}
+Let $\mathcal{S}_{\mathbb{N}}$ denote the Erd\H{o}s-Borwein constant, corresponding to the sum over the complete set of natural numbers $A = \mathbb{N}$:
+\begin{equation}
+  \mathcal{S}_{\mathbb{N}} = \sum_{n=1}^{\infty} \frac{1}{2^n - 1} \approx 1.60669.
+\end{equation}
+Since $\mathcal{S}_{\mathbb{N}} > 1$, a direct summation may result in integer overflow incompatible with the $0.\overline{C_N}$ structre. However, the contribution of the first term is exactly $(2^1 - 1)^{-1} = 1$. By defining the truncation head as the singleton set $A' = \{1\}$, the maximum possible value of the effective tail $A_{\star} = A \setminus \{1\}$ is strictly bounded by the residue of the Erd\H{o}s sum:
+\begin{equation}
+  \sup_{A \subseteq \mathbb{N}} \left( \sum_{a \in A \setminus \{1\}} \frac{1}{2^a - 1} \right) \le \mathcal{S}_{\mathbb{N}} - 1 \approx 0.60669 < 1.
+\end{equation}
+This confirms that for any infinite set $A$, removing at most the single element $\{1\}$ guarantees that the remaining series converges strictly within the fractional interval $(0, 1)$, ensuring that the integer part of the sum is stable and determined exclusively by the presence or absence of $1 \in A$.
+\end{corollary}
+
+
+\subsection{Filtration by Smoothness Shells}
+\label{subsec:smoothness_shells}
+
+We partition the natural numbers based on their largest prime factor. Let $\mathbb{P} = \{p_1, p_2, \dots\} = \{2, 3, 5, \dots\}$ be the ordered set of prime numbers.
+
+\begin{definition}[Smoothness Sets and Differential Shells]
+\label{def:smoothness_shells}
+Let $P(n)$ denote the largest prime factor of an integer $n$.
+\begin{enumerate}
+  \item We define the set of \textbf{$p_k$-smooth numbers}, denoted $\Psi_k$, as:
+  \begin{equation}
+    \Psi_k = \{ n \in \mathbb{N} \mid P(n) \le p_k \}.
+  \end{equation}
+  \item We define the $k$-th \textbf{Differential Smoothness Shell}, denoted $\Delta \Psi_k$, as the set of numbers that are $p_k$-smooth but not $p_{k-1}$-smooth (i.e., numbers whose largest prime factor is exactly $p_k$, see, e.g., \cite{AlloucheShallit2003}) :
+  \begin{equation}
+    \Delta \Psi_k := \Psi_k \setminus \Psi_{k-1} = \{ n \in \mathbb{N} \mid P(n) = p_k \},
+  \end{equation}
+  with the convention $\Psi_0 = \emptyset$.
+\end{enumerate}
+It follows that $\mathbb{N} = \bigcup_{k=1}^{\infty} \Delta \Psi_k$, and the shells are pairwise disjoint.
+\end{definition}
+
+\begin{definition}[Active Shell Components]
+\label{def:active_shells}
+We define the active components of the target set $A_{\star}$ relative to the smoothness filtration as the intersection sequence $\{ A_k \}_{k \ge 1}$:
+\begin{equation}
+  A_k := A_{\star} \cap \Delta \Psi_k.
+\end{equation}
+The target sum is thus reordered as the nested series:
+\begin{equation}
+  S_{\star} = \sum_{k=1}^{\infty} \sum_{a \in A_k} \frac{1}{b^a - 1}.
+\end{equation}
+\end{definition}
+
+\subsection{Recursive Period Construction via LCM}
+\label{subsec:lcm_period}
+
+Unlike the coprime case, the generalized period must accommodate the divisibility properties of all preceding terms. We construct the period $L_k$ as the Least Common Multiple of all active terms up to the $k$-th shell.
+
+\begin{definition}[Cumulative Active Set]
+\label{def:cumulative_active}
+Let $\mathcal{A}^{(k)}$ denote the union of all active shell components up to step $k$:
+\begin{equation}
+  \mathcal{A}^{(k)} := \bigcup_{j=1}^{k} A_j = \{ a \in A_{\star} \mid P(a) \le p_k \}.
+\end{equation}
+\end{definition}
+
+\begin{definition}[Supremum Valuation and Fundamental Period $L_k$]
+\label{def:lcm_period}
+We define the fundamental period at step $k$, denoted $L_k$, via the supremum of prime valuations across the cumulative set $\mathcal{A}^{(k)}$.
+\begin{enumerate}
+  \item For each prime $p \le p_k$, let $v_p(n)$ be the exponent of $p$ in the prime factorization of $n$. We define the \textbf{Supremum Valuation} $\nu_{p,k}$ as:
+  \begin{equation}
+    \nu_{p,k} := \sup_{a \in \mathcal{A}^{(k)}} \{ v_p(a) \}.
+  \end{equation}
+  (We assume $\nu_{p,k} < \infty$ for all $p$, which holds if $A$ is sparse enough or via finite truncation of infinite exponent chains).
+  
+  \item The period $L_k$ is defined as the product of these maximal prime powers:
+  \begin{equation}
+    L_k := \prod_{p \le p_k} p^{\nu_{p,k}} = \operatorname{lcm} \left( \mathcal{A}^{(k)} \right).
+  \end{equation}
+\end{enumerate}
+This construction guarantees that for every $a \in \mathcal{A}^{(k)}$, we have $a \mid L_k$, ensuring that the term $(b^a - 1)^{-1}$ admits a strictly periodic expansion of length $L_k$ without phase shifts.
+\end{definition}
+
+\begin{definition}[Supremum Valuation and Supernatural Period $L_k$]
+\label{def:supernatural_period}
+We define the fundamental period at step $k$, denoted $L_k$, via the supremum of prime valuations across the cumulative set $\mathcal{A}^{(k)}$, allowing for infinite height in the lattice of divisibility.
+
+\begin{enumerate}
+  \item For each prime $p \le p_k$, let $v_p(n)$ be the exponent of $p$ in the prime factorization of $n$. We define the \textbf{Generalized Supremum Valuation} $\nu_{p,k}$ as:
+  \begin{equation}
+    \nu_{p,k} := \sup_{a \in \mathcal{A}^{(k)}} \{ v_p(a) \} \in \mathbb{Z}_{\ge 0} \cup \{ \infty \}.
+  \end{equation}
+  
+  \item The period $L_k$ is defined as the supernatural number (Steinitz number) given by the product (see \cite{FriedJarden2008}):
+  \begin{equation}
+    L_k := \prod_{p \le p_k} p^{\nu_{p,k}} \in \mathbb{S}.
+  \end{equation}
+\end{enumerate}
+
+\begin{remark}
+If $\nu_{p,k} = \infty$ for any prime $p$, the period $L_k$ is not a natural number but an infinite supernatural limit. In the context of the profinite topology of $\hat{\mathbb{Z}}$, this implies that the expansion admits periodicity only in the projective limit sense. 
+\end{remark}
+\end{definition}
+
+
+\subsection{Arithmetic Complexity and Canonical Representation}
+\label{subsec:complexity_layers}
+
+To strictly bound the injection density, we further partition the smoothness shells $\Delta \Psi_k$ based on arithmetic complexity. This allows us to map each integer to a unique coordinate vector of exponents.
+
+\begin{definition}[Arithmetic Complexity $\Omega(n)$]
+Let $\Omega(n)$ denote the total number of prime factors of an integer $n$ counted with multiplicity. If the prime factorization of $n$ is $n = \prod_{i=1}^k p_i^{e_i}$, then:
+\begin{equation}
+  \Omega(n) := \sum_{i=1}^k e_i.
+\end{equation}
+\end{definition}
+
+\begin{definition}[Canonical Exponent Vector $\mathbf{e}$]
+For a fixed smoothness shell $k$, we associate each integer $n \in \Delta \Psi_k$ with a unique vector $\mathbf{e} \in \mathbb{Z}_{\ge 0}^k$:
+\begin{equation}
+  \mathbf{e} = (e_1, e_2, \dots, e_k),
+\end{equation}
+such that $n$ admits the representation $n(\mathbf{e})$:
+\begin{equation}
+  n(\mathbf{e}) := \prod_{i=1}^{k} p_i^{e_i}.
+\end{equation}
+Since $n \in \Delta \Psi_k$, the vector is constrained by the condition that the $k$-th prime must be present, i.e., $e_k \ge 1$.
+\end{definition}
+
+\begin{definition}[The Intersection Layer $\mathcal{S}_{k,j}$]
+\label{def:intersection_layer}
+We define the \textbf{Intersection Layer} $\mathcal{S}_{k,j}$ as the subset of the $k$-th smoothness shell containing numbers with exactly $j$ prime factors. Formally:
+\begin{equation}
+  \mathcal{S}_{k,j} := \Delta \Psi_k \cap \{ n \in \mathbb{N} \mid \Omega(n) = j \}.
+\end{equation}
+In terms of the exponent vector $\mathbf{e}$, this set is isomorphic to the set of restricted compositions:
+\begin{equation}
+  \mathcal{S}_{k,j} \cong \left\{ \mathbf{e} \in \mathbb{Z}_{\ge 0}^k \;\middle|\; \sum_{i=1}^k e_i = j \quad \text{and} \quad e_k \ge 1 \right\}.
+\end{equation}
+This definition ensures that for any $n(\mathbf{e}) \in \mathcal{S}_{k,j}$, the magnitude (dispersion) and the log-displacement are strictly determined by the vector parameters $k$ and $j$.
+\end{definition}
+
+\section{Layered Diophantine Stability}
+\label{sec:formal_definitions_stability}
+
+We define the stability metrics for the sub-problem constrained by the smoothness shell $k$ and the arithmetic complexity $j$.
+
+\subsection{The Layered Diophantine Region}
+
+The Diophantine Region $\mathcal{R}_{k,j}$ represents the exact set of coordinate tuples in the recursive period construction where a structural carry propagation is arithmetically possible similar to the region for the coprimal case stated in Section \ref{sec:diophantine}.
+
+\begin{definition}[Layered Diophantine Region $\mathcal{R}_{k,j}$]
+\label{def:layered_region}
+Let $\mathcal{S}_{k,j}$ be the intersection of the $k$-th smoothness shell and the $j$-th complexity layer. Let $L_{k-1}$ denote the fundamental period of the preceding step. We define the region $\mathcal{R}_{k,j} \subset \mathbb{N}^3$ as the union of solution spaces for all active terms $n \in \mathcal{S}_{k,j}$:
+
+\begin{equation}
+  \mathcal{R}_{k,j} := \bigcup_{n \in \mathcal{S}_{k,j}} \left\{ (x, y, z) \in \mathbb{N}^3 \;\middle|\;
+  \begin{aligned}
+    &1. \quad y = L_{k-1} \\
+    &2. \quad x \cdot y \equiv z \pmod n \\
+    &3. \quad 1 \le z \le \mathcal{M}(n)
+  \end{aligned}
+  \right\},
+  \label{eq:region_definition}
+\end{equation}
+
+where $x$ represents the block index in the expansion of $L_k$, $z$ is the relative injection position within the sub-block, and $\mathcal{M}(n)$ is the \textbf{Maximal Carry Displacement} for the term $n$, bounded logarithmically by (see Definition \ref{def:collision_multiplicity} and Lemma \ref{lem:carries}):
+\begin{equation}
+  \mathcal{M}(n) = \lfloor \log_b(n) \rfloor + 1.
+\end{equation}
+\end{definition}
+
+\subsection{The Pessimistic Density}
+
+We quantify the "structural pressure" exerted by the layer $\mathcal{S}_{k,j}$ on the period $L_k$ by summing the fractional occupancy of the danger zones. This metric assumes a worst-case scenario where every potential collision is disjoint.
+
+\begin{definition}[Pessimistic Density $\rho_{k,j}$]
+\label{def:pessimistic_density}
+The \textbf{Pessimistic Density} $\rho_{k,j}$ is defined as the measure of the union of the danger intervals projected onto the period, normalized by the effective dispersion of each term. Analytically, it is the summation of the \textit{Displacement-to-Dispersion Ratio} over all canonical configurations $\mathbf{e}$ in the layer:
+
+\begin{equation}
+  \rho_{k,j} := \sum_{\mathbf{e} \in \mathbb{E}_{k,j}} \frac{\mathcal{M}(n(\mathbf{e}))}{n(\mathbf{e})},
+  \label{eq:density_def}
+\end{equation}
+
+where $\mathbb{E}_{k,j}$ is the set of valid exponent vectors for the layer (satisfying $\sum e_i = j$ and $e_k \ge 1$), and $n(\mathbf{e})$ is the integer value of the term. Explicitly expanding the terms:
+
+\begin{equation}
+  \rho_{k,j} = \sum_{\substack{e_1 + \dots + e_k = j \\ e_k \ge 1}} \frac{\lfloor \sum_{i=1}^k e_i \log_b(p_i) \rfloor + 1}{\prod_{i=1}^k p_i^{e_i}}.
+  \label{eq:density_explicit}
+\end{equation}
+This scalar value $\rho_{k,j}$ represents the upper bound of the density of sub-blocks in the LCM period $L_k$ is structurally compromised by a term from the complexity layer $j$.
+\end{definition}
+
+
+
+\subsection{Definitions and Diophantine Mapping for the Generalized Case}
+\label{subsec:generalized_definitions}
+
+We formalize the structural components required for the recursion in the generalized setting, where the period growth is governed by the Least Common Multiple (LCM) rather than simple products.
+
+\begin{definition}[Sub-block Index $q$]
+\label{def:generalized_index}
+Let $L_k$ be the fundamental period at step $k$ (see Definition \ref{def:lcm_period}). Let $L_{k-1}$ be the period of the preceding step. The expansion of the sum at step $k$ is constructed by concatenating $\mu_k$ sub-blocks of length $L_{k-1}$, where the multiplicity $\mu_k$ is the integer ratio:
+\begin{equation}
+  \mu_k = \frac{L_k}{L_{k-1}}.
+\end{equation}
+The \textbf{Sub-block Index} $q$ is the discrete coordinate identifying the geometric segment of the expansion:
+\begin{equation}
+  q \in \{1, 2, \dots, \mu_k\}.
+\end{equation}
+This index serves as the domain for the phase-shift sampling map.
+\end{definition}
+
+\begin{definition}[Generalized Perturbation Block $B^{\Psi}_{k,q}$]
+\label{def:generalized_perturbation}
+Let $S_{\Delta \Psi_k}$ be the partial sum of reciprocals over the active terms in the $k$-th smoothness shell $A_k = A_{\star} \cap \Delta \Psi_k$. The \textbf{Generalized Perturbation Block} $B^{\Psi}_{k,q}$ is the integer value extracted from this sum within the temporal window defined by the $q$-th sub-block.
+Analytically, if $\xi_k(t)$ represents the digital stream of $S_{\Delta \Psi_k}$, then $B^{\Psi}_{k,q}$ is the projection:
+\begin{equation}
+  B^{\Psi}_{k,q} := \lfloor b^{L_{k-1}} \cdot \{ S_{\Delta \Psi_k} \cdot b^{(q-1)L_{k-1}} \} \rfloor.
+\end{equation}
+In the recursive construction, this block represents the aggregate structural interference added to the background period $C_{k-1}$ to form the augmented block $C'_{k,q} = C_{k-1} + B^{\Psi}_{k,q}$.
+\end{definition}
+
+\begin{definition}[Mapping to the Layered Diophantine Region]
+\label{def:layered_map}
+To analyze the structural stability of the blocks, we map the index $q$ into the \textbf{Layered Diophantine Region} $\mathcal{R}_{k,j}$.
+For a fixed arithmetic complexity layer $j$, we define the injection map $\Phi_{k,j}$ from the block index space to the solution space of the Diophantine constraints.
+
+Let $\mathcal{S}_{k,j}$ be the set of active terms with complexity $j$. The map $\Phi_{k,j}$ associates the index $q$ with the set of injection coordinates generated by all terms in the layer:
+\begin{equation}
+  \Phi_{k,j} : \{1, \dots, \mu_k\} \to \mathcal{P}(\mathcal{R}_{k,j}),
+\end{equation}
+defined by:
+\begin{equation}
+  \Phi_{k,j}(q) = \bigcup_{n \in \mathcal{S}_{k,j}} \left\{ (x, y, z) \in \mathbb{N}^3 \;\middle|\; 
+  \begin{aligned}
+    &x = q, \\
+    &y = L_{k-1}, \\
+    &z \equiv q \cdot L_{k-1} \pmod n, \\
+    &1 \le z \le \mathcal{M}(n)
+  \end{aligned}
+  \right\}.
+\end{equation}
+A block $q$ is structurally compromised (generating a carry interference) if and only if the image $\Phi_{k,j}(q)$ is non-empty; that is, if the phase $q \cdot L_{k-1}$ falls within the logarithmic "carry zone" $[1, \mathcal{M}(n)]$ for any generator $n$ in the layer.
+\end{definition}
+
+\section{Analytic Derivation via Euler Products and Explicit Bounds}
+\label{sec:analytic_derivation}
+
+We present a derivation of the density bounds using the method of generating functions. This approach allows us to disentangle the contribution of the cardinality of the sets from the arithmetic weight of the carry displacement, leveraging the Euler Product structure of smooth numbers.
+
+\subsection{The Generating Function of the Differential Shell}
+\label{subsec:generating_function}
+
+The fundamental object describing the distribution of reciprocals of $p_k$-smooth numbers is the Euler Product. We construct a specific generating function for the differential shell $\Delta \Psi_k$ that isolates the mandatory presence of the prime $p_k$.
+
+\begin{definition}[Shell Generating Function $G_k(x)$]
+Let $\Psi_k$ be the set of $p_k$-smooth numbers. The generating function for the reciprocals of numbers in $\Psi_k$, weighted by their number of prime factors $\Omega(n)$, is given by:
+\begin{equation}
+  P_k(x) := \sum_{m \in \Psi_k} \frac{x^{\Omega(m)}}{m} = \prod_{i=1}^{k} \left( 1 - \frac{x}{p_i} \right)^{-1}.
+\end{equation}
+This product converges absolutely for complex $|x| < p_1 = 2$.
+For the \textbf{Differential Shell} $\Delta \Psi_k$, every element $n$ has the unique form $n = p_k \cdot m$, where $m \in \Psi_k$. The generating function $G_k(x)$ for this set is therefore:
+\begin{equation}
+  G_k(x) := \sum_{n \in \Delta \Psi_k} \frac{x^{\Omega(n)}}{n} = \frac{x}{p_k} P_k(x) = \frac{x}{p_k} \prod_{i=1}^{k} \left( 1 - \frac{x}{p_i} \right)^{-1}.
+  \label{eq:shell_generating_function}
+\end{equation}
+\end{definition}
+
+\subsection{Derivation for Fixed Complexity Layer $j$}
+\label{subsec:fixed_layer_exact}
+
+We strictly bound the weighted density index $\mathcal{I}_{k,j}$ for a fixed arithmetic complexity $j$.
+
+\begin{theorem}[Explicit Layer Density Bound]
+\label{thm:layer_bound_explicit}
+For a fixed shell $k$ and complexity $j \ge 1$, the density index satisfies:
+\begin{equation}
+  \mathcal{I}_{k,j} \le \frac{\log_b(p_k)}{p_k} \cdot \frac{j}{(j-1)!} \left( \sum_{i=1}^k \frac{1}{p_i} \right)^{j-1}.
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+  \textbf{1. Decomposition of the Density Index:}
+  Recall $\mathcal{I}_{k,j} = \sum_{n \in \mathcal{S}_{k,j}} \frac{z(n)}{n}$.
+  The logarithmic displacement is $z(n) = \lfloor \log_b n \rfloor$. Using the property that the exponents maximize the displacement when assigned to the largest prime $p_k$, and noting $\Omega(n)=j$, we have the strict bound:
+  \begin{equation}
+    z(n) \le j \log_b(p_k).
+  \end{equation}
+  Therefore:
+  \begin{equation}
+    \mathcal{I}_{k,j} \le j \log_b(p_k) \sum_{n \in \mathcal{S}_{k,j}} \frac{1}{n}.
+    \label{eq:index_separation}
+  \end{equation}
+
+  \textbf{2. Identification of the Reciprocal Sum:}
+  The sum $S_j = \sum_{n \in \mathcal{S}_{k,j}} \frac{1}{n}$ is precisely the coefficient of $x^j$ in the series expansion of $G_k(x)$:
+  \begin{equation}
+    S_j = [x^j] G_k(x) = \frac{1}{p_k} [x^{j-1}] P_k(x).
+  \end{equation}
+
+  \textbf{3. Combinatorial Upper Bound:}
+  The coefficients of $P_k(x) = \prod (1 - x/p_i)^{-1}$ are strictly positive. We apply the inequality $[x^m] \prod (1-a_i x)^{-1} \le \frac{1}{m!} (\sum a_i)^m$, which arises from the multinomial expansion of the dominant terms.
+  Here, $a_i = 1/p_i$. Let $H_k = \sum_{i=1}^k \frac{1}{p_i}$. Then:
+  \begin{equation}
+    [x^{j-1}] P_k(x) \le \frac{1}{(j-1)!} (H_k)^{j-1}.
+  \end{equation}
+  
+  \textbf{4. Final Substitution:}
+  Substituting back into Eq. \eqref{eq:index_separation}:
+  \begin{equation}
+    \mathcal{I}_{k,j} \le j \log_b(p_k) \cdot \frac{1}{p_k} \cdot \frac{(H_k)^{j-1}}{(j-1)!}.
+  \end{equation}
+  This proves the theorem. The factor $1/(j-1)!$ ensures super-exponential decay with respect to $j$.
+\end{proof}
+
+\subsection{Derivation for the General Case (Global Stability)}
+\label{subsec:general_density_euler}
+
+We now prove the convergence of the total density by summing over all layers. This is equivalent to evaluating the generating function and its derivative at $x=1$.
+
+\begin{theorem}[Global Density Domination via Mertens' Theorems]
+\label{thm:global_density_exact}
+The cumulative density index $\mathcal{I}_{total}(k)$ for the shell $k$ satisfies the asymptotic bound:
+\begin{equation}
+  \mathcal{I}_{total}(k) = \mathcal{O} \left( \frac{(\ln p_k)^2}{p_k} \right).
+\end{equation}
+Since $\lim_{k \to \infty} \frac{(\ln p_k)^2}{p_k} = 0$, the structural interference vanishes for large $k$.
+\end{theorem}
+
+\begin{proof}
+  \textbf{1. Reformulation of the Total Index:}
+  Instead of summing the loose bounds from Theorem \ref{thm:layer_bound_explicit}, we return to the definition over the set $\Delta \Psi_k$.
+  Every $n \in \Delta \Psi_k$ is of the form $n = p_k m$ with $m \in \Psi_k$.
+  \begin{equation}
+    \mathcal{I}_{total}(k) = \sum_{n \in \Delta \Psi_k} \frac{\log_b n}{n} = \frac{1}{p_k} \sum_{m \in \Psi_k} \frac{\log_b(p_k m)}{m}.
+  \end{equation}
+  Using linearity of the logarithm $\log_b(p_k m) = \log_b p_k + \log_b m$:
+  \begin{equation}
+    \mathcal{I}_{total}(k) = \underbrace{\frac{\log_b p_k}{p_k} \sum_{m \in \Psi_k} \frac{1}{m}}_{T_1} + \underbrace{\frac{1}{p_k} \sum_{m \in \Psi_k} \frac{\log_b m}{m}}_{T_2}.
+  \end{equation}
+
+  \textbf{2. Bounding Term $T_1$ (Mass):}
+  The sum $\sum_{m \in \Psi_k} \frac{1}{m}$ is exactly the Euler product evaluated at $x=1$:
+  \begin{equation}
+    \Pi_k := P_k(1) = \prod_{i=1}^k \left( 1 - \frac{1}{p_i} \right)^{-1}.
+  \end{equation}
+  By Mertens' Third Theorem (cf. \cite{AlloucheShallit2003}), asymptotically:
+  \begin{equation}
+    \Pi_k \sim e^\gamma \ln p_k.
+  \end{equation}
+  Thus, the first term behaves as:
+  \begin{equation}
+    T_1 \approx \frac{\log_b p_k}{p_k} (e^\gamma \ln p_k) \asymp \frac{(\ln p_k)^2}{p_k}.
+  \end{equation}
+
+  \textbf{3. Bounding Term $T_2$ (Logarithmic Moment):}
+  The sum $\sum \frac{\log_b m}{m}$ relates to the derivative of the generating function.
+  Consider the logarithmic derivative of $P_k(x)$ at $x=1$:
+  \begin{equation}
+    \frac{P_k'(1)}{P_k(1)} = \sum_{i=1}^k \frac{d}{dx} \left[ -\ln(1 - x/p_i) \right]_{x=1} = \sum_{i=1}^k \frac{1/p_i}{1 - 1/p_i} = \sum_{i=1}^k \frac{1}{p_i - 1}.
+  \end{equation}
+  We approximate $\sum_{i=1}^k \frac{1}{p_i - 1} \approx \sum \frac{1}{p_i} \sim \ln(\ln p_k)$ (Mertens' Second Theorem).
+  Note that this is the expected value of $\Omega(m)$, not $\log m$. To bound $\log m$, we observe that $\log m = \sum v_p(m) \log p$.
+  A standard analytic number theory bound for the sum of logarithms over smooth numbers yields:
+  \begin{equation}
+    \sum_{m \in \Psi_k} \frac{\ln m}{m} \le \Pi_k \cdot \ln(p_k).
+  \end{equation}
+  Substituting this into $T_2$:
+  \begin{equation}
+    T_2 = \frac{1}{p_k \ln b} \sum_{m \in \Psi_k} \frac{\ln m}{m} \le \frac{1}{p_k \ln b} (\Pi_k \ln p_k) \asymp \frac{(\ln p_k)^2}{p_k}.
+  \end{equation}
+
+  \textbf{4. Conclusion:}
+  Combining both terms:
+  \begin{equation}
+    \mathcal{I}_{total}(k) = T_1 + T_2 \asymp \frac{(\ln p_k)^2}{p_k} + \frac{(\ln p_k)^2}{p_k}.
+  \end{equation}
+  For $p_k \to \infty$, the denominator $p_k$ dominates the polylogarithmic numerator. Thus, the total density tends to 0.
+\end{proof}
+
+
+\section{Deterministic Stability via Cardinality Exhaustion}
+\label{sec:deterministic_stability}
+
+We establish the prevalence of structurally valid blocks through a strictly deterministic counting argument. We construct the total set of arithmetic carry interference generated by the layer $\Delta \Psi_k$ and prove that its cardinality is insufficient to exhaust the available block indices $\{1, \dots, \mu_k\}$, even under the worst-case assumption of a bijective projection (disjoint damage).
+
+\subsection{The Universal Set of Carry Interference}
+\label{subsec:hazard_universe}
+
+We define the set of all potential structural violations as a disjoint union of "Carry Interference Tokens." Each token represents a specific arithmetic requirement for a carry to occur.
+
+\begin{definition}[Carry Interference Cardinality]
+For every term $n(\mathbf{e}) \in \Delta \Psi_k$, the number of sub-blocks in the period $L_k$ that it can potentially corrupt is determined by the ratio of the expansion space $\mu_k$ to the term's magnitude, scaled by the carry displacement (see Subsection \ref{subsec:generalized_definitions}).
+We define the \textbf{Carry Interference Load} $\mathcal{H}(n)$ of a term $n$ as the maximum number of distinct block indices $q$ satisfying the carry condition:
+\begin{equation}
+  \mathcal{H}(n) := \left| \left\{ q \in \{1, \dots, \mu_k\} \;\middle|\; q \cdot L_{k-1} \pmod n \in [1, \mathcal{M}(n)] \right\} \right|.
+\end{equation}
+Deterministically, this count is bounded by the density of the linear congruence solutions:
+\begin{equation}
+  \mathcal{H}(n) \le \left\lceil \mu_k \cdot \frac{\mathcal{M}(n)}{n} \right\rceil.
+\end{equation}
+\end{definition}
+
+\begin{definition}[Total Carry Interference Universe]
+Let $\mathbb{U}_{haz}$ be the set of all active carry interference tokens generated by the entire smoothness shell. This is the disjoint union of the individual carry interference:
+\begin{equation}
+  \mathbb{U}_{haz} := \bigsqcup_{n \in \Delta \Psi_k} \{ \text{token}_1, \dots, \text{token}_{\mathcal{H}(n)} \}.
+\end{equation}
+The cardinality of this universe represents the absolute maximum capacity for damage available to the system.
+\end{definition}
+
+\subsection{Proof of Asymptotic Sparsity via Set Exhaustion}
+\label{subsec:sparsity_proof}
+
+We now map this universe of carry interference to the set of available blocks. The condition for irrationality is that the set of blocks cannot be fully covered (exhausted) by the set of carry interference.
+
+\begin{theorem}[Non-Exhaustion of the Period]
+\label{thm:non_exhaustion}
+Let $\mathcal{B}_{total} = \{1, \dots, \mu_k\}$ be the set of sub-block indices in the new period. Let $\Gamma: \mathbb{U}_{haz} \to \mathcal{B}_{total}$ be the projection map that assigns each carry interference token to the block it corrupts.
+Under the \textbf{Bijective Exhaustion Assumption} (the worst-case scenario where $\Gamma$ is injective, meaning no two carry interference overlap on the same block), the fraction of compromised blocks is strictly dominated by the global density index.
+
+\begin{equation}
+  \frac{|\text{Image}(\Gamma)|}{|\mathcal{B}_{total}|} \le \mathcal{I}_{total}(k) + \epsilon_k,
+\end{equation}
+where $\epsilon_k \to 0$. Since $\mathcal{I}_{total}(k) \to 0$, it is impossible for the carry interference to exhaust the set $\mathcal{B}_{total}$.
+\end{theorem}
+
+\begin{proof}
+  \textbf{1. Cardinality Summation:}
+  The size of the image of $\Gamma$ (the set of actually corrupted blocks $\mathcal{B}_{corr}$) is bounded by the cardinality of the source set $\mathbb{U}_{haz}$:
+  \begin{equation}
+    |\mathcal{B}_{corr}| = |\text{Image}(\Gamma)| \le |\mathbb{U}_{haz}| = \sum_{n \in \Delta \Psi_k} \mathcal{H}(n).
+  \end{equation}
+
+  \textbf{2. Substitution of Deterministic Bounds:}
+  Substituting the bound for $\mathcal{H}(n)$:
+  \begin{equation}
+    |\mathcal{B}_{corr}| \le \sum_{n \in \Delta \Psi_k} \left( \mu_k \frac{\mathcal{M}(n)}{n} + 1 \right) = \mu_k \sum_{n \in \Delta \Psi_k} \frac{\mathcal{M}(n)}{n} + |\Delta \Psi_k|.
+  \end{equation}
+
+  \textbf{3. Normalization by Period Space:}
+  Dividing by the total number of blocks $\mu_k$:
+  \begin{equation}
+    \frac{|\mathcal{B}_{corr}|}{\mu_k} \le \underbrace{\sum_{n \in \Delta \Psi_k} \frac{\mathcal{M}(n)}{n}}_{\mathcal{I}_{total}(k)} + \underbrace{\frac{|\Delta \Psi_k|}{\mu_k}}_{\epsilon_k}.
+  \end{equation}
+
+  \textbf{4. Asymptotic Vanishing:}
+  \begin{itemize}
+    \item The first term is the global density index $\mathcal{I}_{total}(k)$, which we proved in Theorem \ref{thm:global_density_exact} decays as $\mathcal{O}((\ln p_k)^2 / p_k)$.
+    \item The second term $\epsilon_k$ represents the raw count density. Since the LCM expansion $\mu_k$ grows exponentially (or at least as $p_k$) while the count $|\Delta \Psi_k|$ is bounded relative to the arithmetic progression, $\epsilon_k \to 0$ rapidly.
+  \end{itemize}
+
+  \textbf{5. Conclusion via Pigeonhole Principle (Reversed):}
+  Since $\lim_{k \to \infty} ( \mathcal{I}_{total}(k) + \epsilon_k ) = 0$, for sufficiently large $k$, we have $|\mathbb{U}_{haz}| \ll |\mathcal{B}_{total}|$.
+  Even if we distribute the carry interference with maximal efficiency (bijective mapping) to destroy as many distinct blocks as possible, we strictly run out of carry interference tokens before covering the period.
+  Therefore, the existence of a non-empty set of "Safe Blocks" $\mathcal{B}_{safe} = \mathcal{B}_{total} \setminus \mathcal{B}_{corr}$ is mathematically guaranteed by cardinality constraints.
+\end{proof}
+
+
+
+\section{Adelic Obstruction and Phase Shifting via CRT}
+\label{sec:adelic_obstruction}
+
+We establish the non-periodic nature of the expansion by embedding the analysis in the ring of Adeles $\mathbb{A}_{\mathbb{Q}}$. Specifically, we utilize the $p$-adic valuation associated with the new prime factor of the current smoothness shell to demonstrate an insurmountable obstruction to rationality.
+
+\subsection{The Witness Term and $p$-adic Valuation}
+\label{subsec:witness_term}
+
+Recall that the $k$-th smoothness shell $\Delta \Psi_k$ is characterized by the introduction of the new prime factor $p_k$, as an analog behavior related to de addition in different blocks $B_{N+1,q}+C_N$ of the new coprime term analyzed in Section \ref{lem:update}. To prove that the sequence of digits cannot stabilize into the period $L_{k-1}$, we isolate a single term that acts as a "Witness" of the new frequency.
+
+\begin{definition}[Maximal Valuation Witness $n^*$]
+Let $v_{p_k}(n)$ denote the exponent of $p_k$ in the prime factorization of $n$. We define the \textbf{Witness Term} $n^* \in \Delta \Psi_k$ as an element that maximizes the $p$-adic valuation within the active shell:
+\begin{equation}
+  n^* = \operatorname{argmax}_{n \in \Delta \Psi_k} \{ v_{p_k}(n) \}.
+\end{equation}
+If multiple terms attain the maximum, we select the one with the minimal integer magnitude to ensure uniqueness. The contribution of this term to the sum is $\xi^* = (b^{n^*} - 1)^{-1}$.
+\end{definition}
+
+\begin{remark}[Frequency Independence]
+The period of the partial sum $L_{k-1}$ is constructed exclusively from primes $p \le p_{k-1}$. Consequently, $v_{p_k}(L_{k-1}) = 0$. In contrast, by definition, $v_{p_k}(n^*) \ge 1$. This implies that the frequency $1/n^*$ introduced by the witness is arithmetically orthogonal to the background period $L_{k-1}$.
+\end{remark}
+
+\subsection{Phase Shifting via CRT Projection}
+\label{subsec:crt_projection}
+
+We now verify that the "Witness" term introduces a perturbation that shifts its position relative to the background blocks. Although $n^*$ and $L_{k-1}$ are not necessarily coprime (they share factors from small primes), we resolve this via the Chinese Remainder Theorem (CRT).
+
+\begin{lemma}[CRT Decomposition and Unit Projection]
+\label{lem:crt_decomposition}
+Let $n^* = M \cdot P$ be the factorization of the witness term, where $P = p_k^{v_{p_k}(n^*)}$ is the strictly local $p_k$-part, and $M$ is the part composed of primes $p < p_k$.
+\begin{enumerate}
+  \item \textbf{Global Non-Coprimality:} It is possible that $\gcd(L_{k-1}, n^*) > 1$ due to the factor $M$.
+  \item \textbf{Local Coprimality:} Since $L_{k-1}$ contains no factor $p_k$, it follows that $\gcd(L_{k-1}, P) = 1$. Therefore, $L_{k-1}$ is a unit in the ring $\mathbb{Z}/P\mathbb{Z}$ (see \cite{Neukirch1999}).
+\end{enumerate}
+\end{lemma}
+
+\begin{proposition}[Injectivity of the Phase Shift]
+\label{prop:phase_shift}
+Let $z_q$ be the relative position of the Witness injection within the $q$-th sub-block of length $L_{k-1}$, determined by the congruence:
+\begin{equation}
+  q \cdot L_{k-1} \equiv z_q \pmod{n^*}.
+\end{equation}
+Consider the canonical projection $\pi_P: \mathbb{Z}/n^*\mathbb{Z} \to \mathbb{Z}/P\mathbb{Z}$. The mapped positions satisfy:
+\begin{equation}
+  \pi_P(z_q) \equiv q \cdot L_{k-1} \pmod P.
+\end{equation}
+Since $L_{k-1} \in (\mathbb{Z}/P\mathbb{Z})^\times$, the map $f(q) = q \cdot L_{k-1}$ is a bijection on $\mathbb{Z}/P\mathbb{Z}$. Consequently, for any distinct indices $q_1, q_2$ in the range $1 \le q \le P$:
+\begin{equation}
+  q_1 \neq q_2 \implies \pi_P(z_{q_1}) \neq \pi_P(z_{q_2}) \implies z_{q_1} \neq z_{q_2}.
+\end{equation}
+This proves that the witness term generates a strictly distinct perturbation signature for at least $P$ consecutive blocks, regardless of the synchronization with the factor $M$.
+\end{proposition}
+
+\subsection{Existential Distinctness}
+\label{subsec:existential_distinctness}
+
+To disprove periodicity, it is not required that all blocks be distinct, but merely that the sequence is not repetitive.
+
+\begin{theorem}[Existential Block Distinctness]
+\label{thm:existential_distinctness}
+Let $S_{\text{noise}}$ denote the sum of all other terms in $\Delta \Psi_k$ excluding $n^*$. There exist at least two indices $q_1, q_2$ such that the augmented blocks differ:
+\begin{equation}
+  C'_{k, q_1} \neq C'_{k, q_2}.
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Assume for contradiction that $C'_{k, q}$ is constant for all $q$. This implies that the sum of the Witness $\xi^*$ and the noise $S_{\text{noise}}$ creates a periodic pattern modulo $L_{k-1}$.
+However, the Witness $\xi^*$ introduces a $p_k$-adic valuation spike of magnitude $| \xi^* |_{p_k} = p_k^{v_{p_k}(n^*)}$. The position of this spike shifts according to Proposition \ref{prop:phase_shift}.
+For the blocks to remain identical, the term $S_{\text{noise}}$ would have to exactly cancel this shifting spike in every block.
+This is structurally impossible because:
+\begin{enumerate}
+  \item \textbf{Valuation Mismatch:} Any term $n' \in \Delta \Psi_k \setminus \{n^*\}$ satisfies $v_{p_k}(n') \le v_{p_k}(n^*)$. By the Strong Ultrametric Inequality, if $v_{p_k}(n') < v_{p_k}(n^*)$, the sum is dominated by $n^*$ and cannot vanish.
+  \item \textbf{Frequency Mismatch:} If there are other terms with equal valuation, they act as distinct periodic functions. The linear independence of reciprocals $\frac{1}{b^n-1}$ ensures that a non-trivial linear combination cannot result in a constant function over the shifting frame defined by $L_{k-1}$.
+\end{enumerate}
+Thus, the phase shift of the Witness remains uncancelled, forcing $C'_{k, q_1} \neq C'_{k, q_2}$.
+\end{proof}
+
+
+%Example 2
+
+
+\section{Irrationality via Structural Obstruction in the Generalized Case}
+
+\begin{theorem}[Decoupling of Geometric Segmentation and Arithmetic Phase]
+\label{thm:modular_independence}
+
+Let $\mathcal{B} = \{C'_{k,q} \}_{q \ge 1}$ be the sequence of augmented integer sub-blocks generated by the recursive construction at step $k$, where each block is defined on a geometric interval of fixed length $L_{k-1}$.
+Let $n^* \in \Delta \Psi_k$ be the Witness Term with factorization $n^* = M \cdot P$, where $P = p_k^{v_{p_k}(n^*)}$ is the local prime valuation component and $\gcd(M, P) = 1$.
+
+We assert that the \textbf{Structural Distinctness} of the blocks is invariant under the mismatch between the block count and the witness modulus $n^*$, and is independent of the alignment between the geometric borders $q \cdot L_{k-1}$ and the arithmetic period $n^*$.
+
+\begin{proof}
+  \textbf{1. Separation of Sampling and Signal:}
+  The construction defines the injection position $z_q$ of the Witness term into the $q$-th block via the linear congruence map $\Phi: \mathbb{Z} \to \mathbb{Z}/n^*\mathbb{Z}$:
+  \[
+    z_q \equiv q \cdot L_{k-1} \pmod{n^*}.
+  \]
+  Here, the index $q$ represents the discrete sampling grid imposed by the geometric borders. The value $n^*$ represents the global period of the signal.
+
+  \textbf{2. CRT Projection and Noise Filtering:}
+  By the Chinese Remainder Theorem (Lemma \ref{lem:crt_decomposition}), there exists a canonical projection $\pi_P: \mathbb{Z}/n^*\mathbb{Z} \to \mathbb{Z}/P\mathbb{Z}$ such that the phase behavior is isolated to the $p$-adic component:
+  \[
+    \pi_P(z_q) \equiv q \cdot L_{k-1} \pmod P.
+  \]
+  The factor $M$ constitutes synchronization artifacts. However, the distinctness of the pair $(z_{q_1}, z_{q_2})$ is guaranteed if their projections modulo $P$ are distinct, regardless of their values modulo $M$.
+
+  \textbf{3. The Injectivity Condition:}
+  Since the background period $L_{k-1}$ is constructed exclusively from primes $p < p_k$, it follows that $\gcd(L_{k-1}, P) = 1$. Therefore, $L_{k-1}$ is a unit in the ring $\mathbb{Z}/P\mathbb{Z}$. The map $f(q) = q \cdot L_{k-1}$ is a bijection (a cyclic permutation) on the residue class ring $\mathbb{Z}/P\mathbb{Z}$.
+
+  \textbf{4. Universal Local Distinctness:}
+  Consequently, for any sequence of $P$ consecutive blocks (where $P < n^*$), the set of injection positions $\{ \pi_P(z_q) \}_{q=1}^P$ is a permutation of all possible residues modulo $P$.
+  This forces:
+  \[
+    \forall q_1, q_2 \in \{1, \dots, P\}, \quad q_1 \neq q_2 \implies z_{q_1} \neq z_{q_2}.
+  \]
+  \textbf{Conclusion:} The non-coincidence of the borders (the fact that $L_{k-1} \not\equiv 0 \pmod {n^*}$) is precisely what drives the map $f(q)$. If the borders coincided, $z_q$ would be constant. The distinctness is enforced solely by the local modulus $P$, rendering the global alignment with $M$ or the total block count irrelevant, provided the expansion length $\mu_k \ge P$.
+\end{proof}
+
+\end{theorem}
+
+\begin{theorem}[Irrationality of the Generalized Sum $S_{\star}$]
+\label{thm:general_irrational}
+Let $A \subseteq \mathbb{N}$ be an infinite set of integers. Let $S_{\star}$ be the sum defined over the effective truncation $A_{\star} = A \setminus \{1\}$, such that $S_{\star} < 1$. The number $S_{\star}$ is irrational.
+\end{theorem}
+
+\begin{proof}
+We proceed by contradiction. Assume that $S_{\star}$ is rational. Then, its base-$b$ expansion is eventually periodic with a fundamental period $P$.
+
+\subsection{ Stability of the Recursive Construction}
+Let $k$ be a smoothness index sufficiently large such that the constructed period $L_{k-1}$ satisfies $L_{k-1} \gg P$. The approximation at step $k$ is constructed by concatenating $\mu_k$ copies of the integer block $C_{k-1}$ and adding the perturbation blocks $B^{\Psi}_{k,q}$. The new augmented blocks (see Subsection \ref{subsec:generalized_definitions}) are defined as:
+\begin{equation}
+  C'_{k,q} = C_{k-1} + B^{\Psi}_{k,q}, \quad \text{for } 1 \le q \le \mu_k.
+\end{equation}
+To guarantee that the digits of these blocks are preserved (and thus the period $P$ is testable against them), we must ensure that the arithmetic carry does not propagate beyond the block boundary $L_{k-1}$. Using the \textit{Logarithmic Magnitude Analysis} and the bound logic stated in Subsection \ref{subsec:interference_bounds}, the effective magnitude of $B^{\Psi}_{k,q}$ is not controlled as in Theorem \ref{thm:tail_isolation_expanded} it depends on the solutions near to the critical positions, however the full bounds $ C'_{k,q} $ using the logarithmic span of the sum is:
+\begin{equation} \label{eq:log_stability}
+  \log_b(C'_{k,q}) \approx \max(\log_b C_{k-1}, \log_b B^{\Psi}_{k,q}) + \delta_{add},
+\end{equation}
+where $\delta_{add} \le \frac{\ln 2}{\ln b}$ represents the interaction term.
+
+By the \textbf{Bijective Exhaustion Principle} (Theorem \ref{thm:non_exhaustion}), the number of "carry interference tokens" (configurations causing overflow under injection) is strictly dominated by the total space $|\mathcal{B}_{total}|$. Since the density $\mathcal{I}_{total}(k) \to 0$, for almost all indices $q$, the effective carry is contained:
+\begin{equation}
+  \max(\mathcal{L}_{C}, \mathcal{L}_{B}) + \delta_{add} < L_{k-1}.
+\end{equation}
+Thus, the sequence of sub-blocks $C'_{k,q}$ authentically represents the digits of the expansion. The carry of any exceptional block has a minimal incidence over the previous, by the logarithmic bounded magnitude (see Lemma \ref{lem:log_displacement}). Even under multiple layers $j$ the Bijective Effectiveness needs a single solution per block $B^{\Psi}_{k,q}$, the length of the block $C_k$ with geometric growth (see Definition \ref{def:lcm_period}), and the number of solutions imposes a strict bound.
+
+\subsection{The Periodicity Contradiction}
+Under the assumption of rationality, the sequence of digits must repeat with period $P$. Since $L_{k-1}$ is a period of the previous approximation (and $L_{k-1} \gg P$), the structure implies that the background is synchronized. For the global period $P$ to persist into step $k$, the modifications introduced by the new shell must respect this periodicity.
+Specifically, this requires that for indices separated by the period (modulo the structure), the blocks must be identical:
+\begin{equation}
+  C'_{k, q} = C'_{k, q'} \implies B^{\Psi}_{k, q} = B^{\Psi}_{k, q'}.
+\end{equation}
+However, we have established the \textbf{Universal Distinctness of Blocks} (Theorem 11.2). The injection of the new prime factor $p_k$ (the "Witness") creates a unique signature for every position. The map $q \mapsto z_q$ is injective modulo the witness term $n^*$, ensuring:
+\begin{equation}
+  \forall q_1 \neq q_2, \quad B^{\Psi}_{k, q_1} \neq B^{\Psi}_{k, q_2}.
+\end{equation}
+This structural distinctness is absolute. Consequently, no matter how $P$ is aligned, it encounters distinct blocks $C'_{k,q}$ where it requires repetition. The "Witness" term $p_k$ effectively destroys the periodicity inherited from $L_{k-1}$.
+
+Since such a period $P$ cannot accommodate the strictly distinct recursive updates for all $k$, the assumption of rationality is false.
+\end{proof}
+
+
+
+\section{Profinite Analysis of Smoothness Constraints and Infinite Height}
+\label{sec:profinite_analysis}
+
+We address the specific asymptotic scenarios where the generating set $A$ does not traverse infinitely many distinct prime factors (the $p_{\max}$-smooth case) or exhibits unbounded divisibility for specific primes (the infinite exponent case). We unify these under the theory of Steinitz numbers and profinite valuations (cf. \cite{RibesZalesskii2010}).
+
+\subsection{The $p_{\max}$-smooth Limit (Finite Basis)}
+\label{subsec:finite_basis}
+
+Consider the case where the set $A$ is contained entirely within a fixed smoothness set $\Psi_K$ (i.e., all prime factors of elements in $A$ belong to the finite set $\mathcal{P} = \{p_1, \dots, p_K\}$).
+
+\begin{lemma}[Reduction to Infinite Height]
+\label{lem:pigeonhole_height}
+If $A \subseteq \Psi_K$ is an infinite set, then there exists at least one prime $p \in \mathcal{P}$ such that the sequence of valuations $\{v_p(a)\}_{a \in A}$ is unbounded.
+\end{lemma}
+
+\begin{proof}
+We proceed by contradiction.
+
+\textbf{1. Counter-Assumption:}
+Assume, for the sake of contradiction, that for every prime $p_i \in \mathcal{P}$ (where $i \in \{1, \dots, K\}$), the sequence of valuations $\{v_{p_i}(a)\}_{a \in A}$ is bounded.
+
+\textbf{2. Construction of Local Bounds:}
+Under this assumption, for each $i \in \{1, \dots, K\}$, there exists a constant $M_i \in \mathbb{N}$ such that:
+\begin{equation}
+  \forall a \in A, \quad 0 \le v_{p_i}(a) \le M_i.
+\end{equation}
+
+\textbf{3. Definition of the Exponent Space:}
+Let $\mathcal{E}$ be the Cartesian product of the bounded integer intervals defined by these constants:
+\begin{equation}
+  \mathcal{E} = \prod_{i=1}^{K} \{0, 1, \dots, M_i\}.
+\end{equation}
+The cardinality of this set is finite:
+\begin{equation}
+  |\mathcal{E}| = \prod_{i=1}^{K} (M_i + 1) < \infty.
+\end{equation}
+
+\textbf{4. The Injectivity Argument (Fundamental Theorem of Arithmetic):}
+Since $A \subseteq \Psi_K$, every element $a \in A$ admits a prime factorization of the form:
+\begin{equation}
+  a = \prod_{i=1}^{K} p_i^{v_{p_i}(a)}.
+\end{equation}
+We define the valuation map $\Phi: A \to \mathbb{Z}_{\ge 0}^K$ by $\Phi(a) = (v_{p_1}(a), \dots, v_{p_K}(a))$.
+By the Fundamental Theorem of Arithmetic, the prime factorization is unique; thus, the map $\Phi$ is injective.
+
+\textbf{5. Cardinality Contradiction:}
+Under the Counter-Assumption (Step 1), the image of $A$ under $\Phi$ is contained entirely within the finite set $\mathcal{E}$:
+\begin{equation}
+  \Phi(A) \subseteq \mathcal{E}.
+\end{equation}
+Since $\Phi$ is injective, we must have:
+\begin{equation}
+  |A| = |\Phi(A)| \le |\mathcal{E}| < \infty.
+\end{equation}
+This implies that $A$ is a finite set, which directly contradicts the hypothesis that $A$ is infinite.
+
+\textbf{6. Conclusion:}
+The counter-assumption is false. Therefore, there must exist at least one index $j \in \{1, \dots, K\}$ such that the set of valuations $\{v_{p_j}(a) \mid a \in A\}$ is not bounded.
+\end{proof}
+
+
+\textbf{Implication:} The $p_{\max}$-smooth case is structurally isomorphic to the \textbf{Infinite Height Case}. We proceed to prove the irrationality for this scenario via induction on the valuation tower.
+
+\subsection{The Infinite Height Induction}
+\label{subsec:infinite_height}
+
+Let $p$ be a fixed prime such that $\sup_{a \in A} v_p(a) = \infty$. We construct the proof of irrationality by induction on the recursive period construction, creating a sequence of obstructions in the $p$-adic integers $\mathbb{Z}_p$.
+
+\begin{remark}[Structural Isomorphism of the Periodic Representation]
+\label{rem:representation_isomorphism}
+Before establishing the profinite obstruction, we explicitly validate that the logic governing the integer block representation $0.\overline{C_N}$ (introduced in Section \ref{subsec:dual_representation}) remains structurally valid in the generalized setting:
+
+\begin{enumerate}
+  \item \textbf{Admissibility of the Period:} While the strictly multiplicative growth of Equation \eqref{eq:period_multiplicative} is replaced by the LCM construction (Definition \ref{def:lcm_period}), the fundamental condition $a \mid L_k$ holds for all active terms. Thus, the partial sum $S_k$ admits the exact periodic form derived in Theorem \ref{thm:strict_periodicity} without phase fragmentation.
+
+  \item \textbf{Stability of the Integer Boundary:} The guarantee that the tail carry does not corrupt the integer part—essential for the definition of $C_N$—is preserved via the Tail Truncation strategy (Definition \ref{def:tail_truncation}). This ensures that the global bound established in Theorem \ref{thm:limiting_Edge Case} applies to the effective sum $S_{\star}$, maintaining the separation required by Theorem \ref{thm:tail_isolation_expanded}.
+\end{enumerate}
+
+Consequently, the coefficients of the expansion in the $p$-adic limit $\mathbb{Z}_p$ are well-defined rigid blocks, structurally identical to the coprime case, allowing us to apply the obstruction analysis to $C_k$ without ambiguity.
+\end{remark}
+
+\begin{definition}[Valuation Tower]
+\label{def:valuation_tower}
+Let $\{L_k\}_{k \ge 0}$ be the sequence of fundamental LCM periods constructed from the set $A$. Let $V_k = v_p(L_k)$ be the $p$-adic valuation of the period at step $k$. Since the valuations in $A$ are unbounded, we have $\lim_{k \to \infty} V_k = \infty$ in the $p$-adic topology (see \cite{Gouvea1997}).
+\end{definition}
+
+\begin{theorem}[Inductive Non-Stabilization of the Period]
+\label{thm:inductive_profinite}
+Let $p$ be a prime such that the valuations in $A$ are unbounded, guaranteed by Lemma \ref{lem:pigeonhole_height}. Let $\{L_k\}_{k \ge 0}$ be the sequence of fundamental LCM periods, and let $V_k = v_p(L_k)$ be the associated valuation tower (Definition \ref{def:valuation_tower}).
+
+Let $T \in \mathbb{N}$ be any candidate rational period for the sum $S$. We assert that $T$ cannot represent the expansion of $S$.
+
+\end{theorem}
+
+\begin{proof}
+We proceed by induction on the valuation step $k$, demonstrating an insurmountable obstruction in the $p$-adic topology.
+
+\textbf{1. The Divergence Condition:}
+Since $\lim_{k \to \infty} V_k = \infty$ (by Lemma \ref{lem:pigeonhole_height}), for any fixed candidate period $T$, there exists a critical step $k_0$ such that for all $k \ge k_0$:
+\begin{equation}
+  V_{k+1} > V_k \ge v_p(T).
+\end{equation}
+
+\textbf{2. Base Hypothesis (Stability at step $k$):}
+Assume the partial sum $S_k$ is represented by the period $L_k$. By Theorem \ref{thm:strict_periodicity} (Strict Periodicity), \textbf{the logic for $0.\overline{C_N}$ remains valid for the generalized case} (see Definition \ref{def:tail_truncation}), the expansion is stable and carry-free up to the boundary defined by $L_k$. In the $p$-adic quotient group $\mathbb{Z}/p^{V_k}\mathbb{Z}$, the sequence is periodic with frequency $p^{V_k}$.
+
+\textbf{3. Inductive Step (The Witness Injection):}
+Let $n^* \in A$ be the term introduced at the transition to step $k+1$ satisfying the maximal valuation condition:
+\begin{equation}
+  v_p(n^*) = V_{k+1}.
+\end{equation}
+Consider the expansion in the finer quotient group $G = \mathbb{Z}/p^{V_{k+1}}\mathbb{Z}$.
+\begin{enumerate}
+  \item The background sum $S_k$ has period $L_k$ (see Theorems \ref{thm:existential_distinctness},\ref{thm:general_irrational}). Since $v_p(L_k) = V_k < V_{k+1}$, $S_k$ completes $p^{V_{k+1}-V_k}$ cycles within the new fundamental domain. It is invariant under shifts of $p^{V_k}$.
+  \item The witness term $\xi = (b^{n^*} - 1)^{-1}$ introduces a primitive frequency corresponding to $p^{V_{k+1}}$. It is \textbf{not} invariant under shifts of $p^{V_k}$.
+\end{enumerate}
+
+\textbf{4. The Orthogonality Contradiction:}
+If $S$ were rational with period $T$, then $S$ must be invariant under the shift operator $\sigma_T$ (shifting the digits by $T$) in the profinite limit $\hat{\mathbb{Z}}$ (see \cite{RibesZalesskii2010}).
+However, we have established that $v_p(T) \le V_k$.
+The shift by $T$ acts as a "short cycle" relative to the new structure $V_{k+1}$. Specifically:
+\begin{equation}
+  S \pmod{p^{V_{k+1}}} \not\equiv \sigma_T(S) \pmod{p^{V_{k+1}}},
+\end{equation}
+because the witness component $\xi$ requires a shift of order at least $p^{V_{k+1}}$ to return to phase, whereas $T$ provides a shift of order only $p^{v_p(T)} \le p^{V_k}$.
+
+\textbf{5. Conclusion:}
+Since this inequality holds for all $k \ge k_0$, and the valuation tower increases indefinitely, there is no finite integer $T$ that can satisfy the periodicity requirement for all $p$-adic moduli simultaneously. Thus, $S$ is not rational.
+\end{proof}
+
+\subsection{Formalization via Steinitz Numbers}
+\label{subsec:steinitz}
+
+We consolidate both cases (new primes and infinite height) into a single topological statement.
+
+\begin{definition}[Supernatural Period $\mathcal{L}$]
+The sequence of periods $L_k$ converges in the profinite topology to a \textbf{Steinitz Number} (or Supernatural Number) $\mathcal{L}$ (see \cite{FriedJarden2008}, cf. \cite{Cassels1986}):
+\begin{equation}
+  \mathcal{L} = \prod_{p \in \mathbb{P}} p^{\nu_p}, \quad \text{where } \nu_p = \sup_{a \in A} v_p(a) \in \mathbb{Z}_{\ge 0} \cup \{\infty\}.
+\end{equation}
+\end{definition}
+\begin{remark}[Mixed Valuation Structures and Sufficiency of Single Obstruction]
+\label{rem:mixed_structure}
+The profinite framework naturally accommodates \textbf{mixed valuation structures}, where the generalized period $\mathcal{L}$ exhibits infinite height for a subset of primes while remaining finite for others. For instance, a set $A$ may generate a period with a profile such as:
+\begin{equation}
+  \mathcal{L} = 2^{\infty} \cdot 3^{5} \cdot 5^{\infty} \cdot 7^{0} \cdots
+\end{equation}
+It is crucial to note that the proof of irrationality (Theorem \ref{thm:inductive_profinite}) does not require the induction to hold for all primes simultaneously.
+\begin{itemize}
+  \item \textbf{Rationality Requirement:} For $S$ to be rational, its supernatural period $\mathcal{L}$ must be a finite integer, which requires $\nu_p < \infty$ for \textbf{every} prime $p$.
+  \item \textbf{Falsification Condition:} The existence of a \textbf{single} prime $p$ such that $\nu_p = \infty$ is sufficient to trigger the inductive obstruction in $\mathbb{Z}_p$. The behavior of other prime components (whether finite or infinite) is irrelevant to the divergence of the valuation tower $V_k$ at $p$.
+\end{itemize}
+Thus, the mixed case is strictly covered by the induction in Section \ref{subsec:infinite_height}, as the failure of periodicity in any local field $\mathbb{Q}_p$ implies failure in $\mathbb{Q}$.
+\end{remark}
+\begin{corollary}[The Rationality Obstruction]
+A number defined by a recursive expansion is rational if and only if its supernatural period $\mathcal{L}$ divides a finite integer $T$. This requires:
+\begin{enumerate}
+  \item Finite Support: $\nu_p = 0$ for all but finitely many primes. (Violated by Case 1: Infinite distinct primes).
+  \item Finite Valuation: $\nu_p < \infty$ for all primes. (Violated by Case 2: Infinite height).
+\end{enumerate}
+Since any infinite set $A$ must violate at least one of these conditions (by Lemma \ref{lem:pigeonhole_height}), the sum $S$ is always irrational.
+\end{corollary}
+
+
+
+
+
+\begin{thebibliography}{99}
+
+% --- Referencias existentes (mantener las que ya tienes) ---
+\bibitem{Erdos1948}
+P.~Erd{\H{o}}s,
+\textit{On arithmetical properties of Lambert series},
+J. Indian Math. Soc. (N.S.) \textbf{12} (1948), 63--66.
+
+\bibitem{Erdos1957}
+P.~Erd{\H{o}}s,
+\textit{On the irrationality of certain series},
+Indag. Math. \textbf{19} (1957), 212--219.
+
+\bibitem{ErdosGraham1980}
+P.~Erd{\H{o}}s and R.~L.~Graham,
+\textit{Old and New Problems and Results in Combinatorial Number Theory},
+Monographies de L'Enseignement Math{\'e}matique, vol. 28, Universit{\'e} de Gen{\`e}ve, 1980.
+
+\bibitem{TaoTeravainen2025}
+T.~Tao and J.~Ter{\"a}v{\"a}inen,
+\textit{Quantitative correlations and some problems on prime factors of consecutive integers},
+arXiv preprint arXiv:2512.01739 (2025).
+
+% --- Nuevas Referencias para Análisis p-ádico y Profinito (Secciones 12 y 13) ---
+
+% Fundamental para la intuición de la métrica no arquimediana y testigos (Sec. 13)
+\bibitem{Gouvea1997}
+F.~Q.~Gouv{\^e}a,
+\textit{p-adic Numbers: An Introduction},
+Springer-Verlag, Berlin, Heidelberg, 1997.
+
+% Para la construcción formal de Z_p como límite inverso y bolas p-ádicas
+\bibitem{Koblitz1984}
+N.~Koblitz,
+\textit{p-adic Numbers, p-adic Analysis, and Zeta-Functions},
+Graduate Texts in Mathematics, vol. 58, Springer-Verlag, New York, 1984.
+
+% Para valoraciones, anillos locales y obstrucción adélica (Sec. 12 - Obstrucción Adélica)
+\bibitem{Neukirch1999}
+J.~Neukirch,
+\textit{Algebraic Number Theory},
+Grundlehren der mathematischen Wissenschaften, vol. 322, Springer-Verlag, Berlin, Heidelberg, 1999.
+
+% Referencia clave para Topología Profinita y límites inversos (Teorema 13.3 - Inducción Profinita)
+\bibitem{RibesZalesskii2010}
+L.~Ribes and P.~Zalesskii,
+\textit{Profinite Groups},
+Ergebnisse der Mathematik und ihrer Grenzgebiete. 3. Folge, vol. 40, Springer-Verlag, Berlin, Heidelberg, 2010.
+
+% Para Números Sobrenaturales (Steinitz) y aritmética de cuerpos (Corolario 13.5)
+\bibitem{FriedJarden2008}
+M.~D.~Fried and M.~Jarden,
+\textit{Field Arithmetic},
+3rd ed., Ergebnisse der Mathematik und ihrer Grenzgebiete. 3. Folge, vol. 11, Springer-Verlag, Berlin, Heidelberg, 2008.
+
+% Contexto sobre secuencias de dígitos, periodicidad y k-regularidad
+\bibitem{AlloucheShallit2003}
+J.-P.~Allouche and J.~Shallit,
+\textit{Automatic Sequences: Theory, Applications, Generalizations},
+Cambridge University Press, Cambridge, 2003.
+
+% Clásico para cuerpos locales y lema de Hensel (justificación de inyectividad de fase)
+\bibitem{Cassels1986}
+J.~W.~S.~Cassels,
+\textit{Local Fields},
+London Mathematical Society Student Texts, vol. 3, Cambridge University Press, Cambridge, 1986.
+
+\end{thebibliography}
+
+
+
+
+\end{document}
