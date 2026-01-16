@@ -13,12 +13,45 @@ namespace Erdos
 
 /-!
 
-  This file provides a small Lean formalization scaffold for the objects appearing
-  in the TeX manuscript `mainr(1).tex`.
+This file provides a Lean formalization scaffold for the objects and proof layers
+appearing in the manuscript `mainr(1).tex`.
 
-  The full irrationality proof is not (yet) formalized here; we record the main
-  statement as a theorem stub and fully formalize some elementary arithmetic
-  components (e.g. the lcm/multiplicative period step under coprimality).
+Current status:
+
+* The **combinatorial exhaustion kernel** is fully formalized:
+  `DistinctnessKernel.EventuallyPeriodic`, `DistinctnessKernel.EventuallyPeriodic_tail_finite`,
+  and `DistinctnessKernel.not_eventuallyPeriodic_of_unbounded_range`.
+* The **rational ⇒ eventual periodicity** step is fully formalized via a finite-state remainder
+  recursion on `Fin q.den`:
+  `Erdos257.eventuallyPeriodic_of_rec_finite`, `Erdos257.ratState`, `Erdos257.ratStateNat`,
+  `Erdos257.ratStateNat_eventuallyPeriodic`, and `Erdos257.eventuallyPeriodic_of_eventuallyEq`.
+* The **analytic/density layer** (Euler-product / tail isolation / deterministic density
+  domination / boundary stability) is *proved in the manuscript* (see in particular
+  Theorem `thm:tail_isolation_expanded` and the density discussion around
+  Definition `def:sup_dens`), but is *not yet formalized in Lean*.
+  In this scaffold it is packaged as a single axiom `Erdos257.density_axiom`.
+
+Consequently, the theorem `Erdos257.erdos257_generalized` is a genuine Lean theorem, but it is
+conditional on `density_axiom`.
+
+Navigation guide (Lean names corresponding to manuscript steps):
+
+* **Series object:** `erdosSeries`.
+* **Period arithmetic:** `lcm_eq_mul_of_coprime`, `le_lcm_left_of_pos`, `le_lcm_right_of_pos`,
+  `lt_lcm_of_coprime_of_one_lt_right`, `lt_lcm_of_coprime_of_one_lt_left`, and the denominator
+  monotonicity lemmas `periodDenom_lt_of_lt` / `periodDenom_le_of_le`.
+* **Carry-span proxy:** `Collision.collisionMultiplicity`, `Collision.collisionMultiplicity_le_card`,
+  `Collision.collisionMultiplicity_lt_pow_succ_log`.
+* **Witness selection in finite shells:** `Witness.vp`, `Witness.exists_witness_vp`.
+* **Integer block/carry model:** `BlockModel.blockBase`, `BlockModel.trunc`, `BlockModel.carry`,
+  `BlockModel.trunc_add_blockBase_mul_carry`, and the generalized concatenation machinery
+  `BlockModel.concatWithCarryTrace` together with
+  `BlockModel.concatWithCarry_index_decomp` and `BlockModel.concatWithCarryBlocks_lt_blockBase`.
+* **Final contradiction pipeline:** `Erdos257.density_axiom` ⇒
+  `Erdos257.blocks_unbounded_of_density` and
+  `Erdos257.blocks_eventually_eq_ratStateNat_of_density` ⇒
+  `Erdos257.rational_series_eventuallyPeriodic_blocks` ⇒
+  `Erdos257.erdos257_generalized`.
 -/
 
 section Series
@@ -43,9 +76,7 @@ section Period
 
 /--
 If two periods are coprime, their least common multiple is their product.
-Use the density to bound the block rather than the magnitude 
-(assume the analytic euler product bound if lean4 is limited), 
-focus on the exhaust argument, Use induction ( to simplify the profinite)
+
 This is the purely arithmetic core behind the manuscript's multiplicative step
 `L_{N+1} = L_N · a^*_{N+1}` under the coprimality hypothesis.
 -/
@@ -64,6 +95,13 @@ Abstracting this recurrence, we record the basic monotonicity fact
 `L ≤ lcm(L, K)` and the strict growth statement in the coprime case.
 
 This is the Lean core behind “the period is increasing / c”.
+
+Key Lean results in this section:
+
+* Multiplicativity under coprimality: `lcm_eq_mul_of_coprime`.
+* Monotonicity: `le_lcm_left_of_pos`, `le_lcm_right_of_pos`.
+* Strict growth when the other factor is > 1: `lt_lcm_of_coprime_of_one_lt_right` and
+  `lt_lcm_of_coprime_of_one_lt_left`.
 -/
 
 theorem le_lcm_left_of_pos {L K : ℕ} (hL : 0 < L) (hK : 0 < K) : L ≤ Nat.lcm L K := by
@@ -101,6 +139,12 @@ For a purely periodic base-`b` expansion with period length `L`, the natural den
 conclude the denominators are increasing as well.
 
 We keep this in `ℕ` (not reduced fractions): the key point is monotonicity.
+
+Key Lean results in this section:
+
+* Denominator definition: `periodDenom`.
+* Strict monotonicity for `b > 1`: `periodDenom_lt_of_lt` (via `pow_lt_pow_of_lt_right`).
+* Monotonicity for `b ≥ 1`: `periodDenom_le_of_le`.
 -/
 
 def periodDenom (b L : ℕ) : ℕ := b ^ L - 1
@@ -139,9 +183,9 @@ theorem pow_lt_pow_of_lt_right {b m n : ℕ} (hb : 1 < b) (hmn : m < n) : b ^ m 
   calc
     b ^ m = b ^ m * 1 := by simp
     _ < b ^ m * b ^ k := Nat.mul_lt_mul_of_pos_left hone_lt_powk (pow_pos hb0 _)
-    _ = b ^ (m + k) 
+    _ = b ^ (m + k)
     := by simp [pow_add]
-    _ = b ^ n 
+    _ = b ^ n
     := by simp [hk]
 
 theorem periodDenom_lt_of_lt
@@ -181,6 +225,10 @@ period of the sum divides `lcm(Lx,Ly)`. A clean way to formalize the algebraic c
   `K = lcm(Lx,Ly)`.
 
 This avoids any digit-expansion development and isolates the modular arithmetic.
+
+Key Lean result in this section:
+
+* Modular period containment: `modEq_pow_lcm_of_modEq_pow`.
 -/
 
 theorem modEq_pow_lcm_of_modEq_pow
@@ -237,6 +285,12 @@ at position `n` is
 The “logarithmic containment of carries” is, at its arithmetic core, the fact that the size of
 `ν(n)` determines how many base-`b` digits are needed to represent it. This is captured by
 `Nat.log`.
+
+Key Lean results in this section:
+
+* Collision multiplicity definition: `collisionMultiplicity`.
+* Trivial bound by cardinality: `collisionMultiplicity_le_card`.
+* Logarithmic digit-span bound: `collisionMultiplicity_lt_pow_succ_log`.
 -/
 
 /-- Collision multiplicity for a finite exponent set `E` at position `n`. -/
@@ -277,6 +331,11 @@ valuation. In Lean we can model a p-adic exponent on `ℕ` using `Nat.factorizat
 `v_p(n) := (Nat.factorization n) p`.
 
 Since shells are finite (in the formalization stage we work with `Finset ℕ`), a maximizer exists.
+
+Key Lean results in this section:
+
+* `p`-adic exponent surrogate: `vp`.
+* Existence of a maximizer in a finite shell: `exists_witness_vp`.
 -/
 
 /-- The `p`-adic exponent `v_p(n)` defined via `Nat.factorization`. -/
@@ -318,6 +377,13 @@ block) using the natural base `B = b^L`.
 
 The key lemma is the standard division algorithm identity
 `t = (t % B) + B * (t / B)`.
+
+Key Lean definitions/lemmas in this section:
+
+* Base and projections: `blockBase`, `trunc`, `carry`.
+* Basic facts: `blockBase_pos`, `trunc_lt_blockBase`.
+* Division algorithm identity: `trunc_add_blockBase_mul_carry`.
+* One-step update: `addBlockStep` with specification `addBlockStep_spec`.
 -/
 
 def blockBase (b L : ℕ) : ℕ := b ^ L
@@ -393,6 +459,16 @@ we scan from the least-significant block `q = K` down to `q = 1`, maintaining an
 
 The output is the list of regularized blocks `[C'₁, …, C'_K]` and the carry trace
 `[κ₀, κ₁, …, κ_K]` with `κ_K = 0`.
+
+Key Lean definitions/lemmas in this subsection:
+
+* Main construction: `concatWithCarryTrace`, `concatWithCarryBlocks`, `concatWithCarryValue`.
+* Structural recurrences and lengths:
+  `concatWithCarryTrace_cons`, `concatWithCarryTrace_blocks_length`,
+  `concatWithCarryTrace_carries_length`, `concatWithCarryBlocks_length`.
+* Per-index recurrences and decomposition:
+  `concatWithCarryBlocks_get`, `concatWithCarryCarries_get`, `concatWithCarry_index_decomp`.
+* Range bounds for produced blocks: `concatWithCarryBlocks_lt_blockBase`.
 -/
 
 /--
@@ -838,6 +914,19 @@ This file deliberately separates the proof into:
 
 Lean currently focuses on the second layer. We assume the analytic/density inputs as axioms
 mirroring the manuscript [mainr(1).tex], then complete the exhaustion argument formally.
+
+Key Lean results used in the final contradiction:
+
+* Analytic/density layer (assumed): `Erdos257.density_axiom`.
+* Derived consequences:
+  `Erdos257.blocks_unbounded_of_density` and
+  `Erdos257.blocks_eventually_eq_ratStateNat_of_density`.
+* Rational periodicity and transfer:
+  `Erdos257.ratStateNat_eventuallyPeriodic`,
+  `Erdos257.eventuallyPeriodic_of_eventuallyEq`,
+  `Erdos257.rational_series_eventuallyPeriodic_blocks`.
+* Final statement:
+  `Erdos257.erdos257_generalized`.
 -/
 namespace Erdos257
 
@@ -854,6 +943,14 @@ We then *define* `blocks` by classical choice from that existence axiom.
 
 This way, `blocks` is no longer an axiom: it is a bona fide Lean definition, and the only
 remaining non-formalized ingredient is the single analytic/density axiom.
+
+Relevant Lean declarations:
+
+* Analytic existence package (axiom): `density_axiom`.
+* Chosen block sequence: `blocks`.
+* Two extracted consequences used later:
+  `blocks_unbounded_of_density` and
+  `blocks_eventually_eq_ratStateNat_of_density`.
 -/
 
 /-!
@@ -867,6 +964,14 @@ We use this as the formal replacement for the previously-axiomatized
 `rational_series_eventuallyPeriodic_blocks`. The only remaining assumed bridge is that, under the
 manuscript's density/tail-isolation hypotheses, the extracted block sequence from the series
 eventually matches the rational-state sequence.
+
+Key Lean declarations in this subsection:
+
+* Finite-state eventual periodicity template: `eventuallyPeriodic_of_rec_finite`.
+* Remainder update and state recursion: `ratStep`, `ratState`, `ratStateNat`.
+* Eventual periodicity of the rational state and its projection:
+  `ratState_eventuallyPeriodic` and `ratStateNat_eventuallyPeriodic`.
+* Transfer along eventual equality: `eventuallyPeriodic_of_eventuallyEq`.
 -/
 
 theorem eventuallyPeriodic_of_rec_finite
@@ -998,6 +1103,12 @@ It has two consequences:
 
 Everything else (eventual periodicity of the rational recursion, transfer lemmas, contradiction)
 is proved in Lean.
+
+In the manuscript this axiom is discharged using Euler-product/tail bounds and deterministic
+density domination in the Diophantine region. In this Lean scaffold we keep it as an axiom.
+
+In Lean we immediately derive the two concrete consequences needed by the contradiction:
+`blocks_unbounded_of_density` and `blocks_eventually_eq_ratStateNat_of_density`.
 -/
 
 axiom density_axiom :
@@ -1048,7 +1159,7 @@ theorem rational_series_eventuallyPeriodic_blocks
     (q : ℚ) :
     erdosSeries b A = q → EventuallyPeriodic (blocks b A) := by
   intro hq
-  have hrat : 
+  have hrat :
   EventuallyPeriodic (ratStateNat b q) := ratStateNat_eventuallyPeriodic (b := b) (q := q)
   have hEq : ∃ N, ∀ n ≥ N, blocks b A n = ratStateNat b q n :=
     blocks_eventually_eq_ratStateNat_of_density b hb A hA hpos q hq
