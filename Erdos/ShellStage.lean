@@ -3,6 +3,7 @@ import Mathlib.Data.Finset.Prod
 
 import Erdos.BlockWitness
 import Erdos.HazardMaps
+import Erdos.PhaseShift
 
 namespace Erdos
 
@@ -43,6 +44,32 @@ structure ShellStage where
   hinj : Set.InjOn val (↑B : Set ℕ)
 
 namespace ShellStage
+
+/--
+Convenience constructor: build a `ShellStage` with block values given by the phase shift
+`q ↦ (q·L) mod μ`.
+
+Under `Nat.Coprime L μ`, injectivity on any `B ⊆ blockIndices μ` is supplied automatically via
+the lemma in [Erdos/PhaseShift.lean](Erdos/PhaseShift.lean).
+-/
+noncomputable def mkPhaseShift
+    (μ L : ℕ) (hμ : μ ≠ 0) (hcop : Nat.Coprime L μ)
+    (active : Finset ℕ) (M : ℕ → ℕ)
+    (B : Finset ℕ) (hB : B ⊆ blockIndices μ)
+    (witness : ℕ) (hwitness : witness ∈ active) : ShellStage := by
+  classical
+  haveI : NeZero μ := ⟨hμ⟩
+  exact
+    { μ := μ
+      L := L
+      active := active
+      M := M
+      B := B
+      hB := hB
+      witness := witness
+      hwitness := hwitness
+      val := phaseShiftNat μ L
+      hinj := phaseShiftNat_injOn_of_subset_blockIndices (n := μ) (L := L) hcop B hB }
 
 /-- Hazard tokens restricted to the suitable `q` values. -/
 noncomputable def hazardTokensOn (st : ShellStage) : Finset (ℕ × ℕ) := by

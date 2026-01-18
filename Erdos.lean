@@ -1,5 +1,6 @@
 import Erdos.Basic
-import Mathlib.Data.Nat.PrimeFin
+import Erdos.RationalPeriodAlignment
+import Erdos.ShellLevels
 import Erdos.TokenBijection
 import Erdos.HazardMaps
 import Erdos.ShellStage
@@ -7,6 +8,8 @@ import Erdos.HazardCounting
 import Erdos.HazardTokenCard
 import Erdos.ShellDensity
 import Erdos.ShellIrrationality
+import Erdos.ShellToKernelBridge
+import Erdos.ShellToRationalModelRecursion
 import Erdos.FullClaim
 
 namespace Erdos
@@ -14,55 +17,7 @@ namespace Erdos
 namespace Erdos257
 
 /--
-`largestPrimeFactor n` is the largest prime factor of `n`.
-
-For `n ≤ 1` we define it to be `1` (so that the function is total).
-In the shell arguments in this repo we always assume `1 ≤ n`, and typically `2 ≤ n`
-on the nontrivial shells.
-
-This is the intended meaning of the manuscript's `P(n)`.
--/
-noncomputable def largestPrimeFactor (n : ℕ) : ℕ :=
-  if h : 1 < n then
-    n.primeFactors.max' ((Nat.nonempty_primeFactors).2 h)
-  else
-    1
-
-/--
-`ShellRespectsLevel shell P p` means: every index `n` placed in the `k`-th shell satisfies
-`P n = p k`.
-
-This is the formal way to express manuscript-style shells of the form
-“`shell k = { n : ... | P(n) = p_k }`” (e.g. when `P` is a prime-factor statistic).
--/
-def ShellRespectsLevel (shell : Shell) (P : ℕ → ℕ) (p : ℕ → ℕ) : Prop :=
-  ∀ k n, n ∈ shell k → P n = p k
-
-/-- Convenience alias: shells described by the levels of the largest-prime-factor statistic. -/
-def ShellRespectsLargestPrimeFactor (shell : Shell) (p : ℕ → ℕ) : Prop :=
-  ShellRespectsLevel shell largestPrimeFactor p
-
-/--
-`DifferentialShellLogSmallOnLevels A shell P p` is exactly the usual analytic hypothesis
-`∑_{n ∈ shell k} log(n)/n ≪ 1` (uniformly with constant `< 1`), together with the explicit
-level condition `P(n) = p_k` for `n ∈ shell k`.
-
-This matches the phrasing “the sum `∑ log(n)/n` over the `P(n)=p_k` shell is `≪ 1`”.
--/
-def DifferentialShellLogSmallOnLevels (A : Set ℕ) (shell : Shell) (P : ℕ → ℕ) (p : ℕ → ℕ) : Prop :=
-  DifferentialShellLogSmall A shell ∧ ShellRespectsLevel shell P p
-
-/-- Convenience alias: small log-moment shells, explicitly grouped by `largestPrimeFactor`. -/
-def DifferentialShellLogSmallOnLargestPrimeFactor (A : Set ℕ) (shell : Shell) (p : ℕ → ℕ) : Prop :=
-  DifferentialShellLogSmallOnLevels A shell largestPrimeFactor p
-
-theorem DifferentialShellLogSmallOnLevels_iff (A : Set ℕ) (shell : Shell) (P : ℕ → ℕ) (p : ℕ → ℕ) :
-    DifferentialShellLogSmallOnLevels A shell P p ↔
-      (DifferentialShellLogSmall A shell ∧ ShellRespectsLevel shell P p) :=
-  Iff.rfl
-
-/--
-Fully integrated *statement* (no axioms) of the shell-criterion theorem.
+Fully integrated *statement* of the shell-criterion theorem.
 
 Let `A` be an infinite subset of naturals and `b ≥ 2`. Assume positivity on indices and that the
 Erdős series is already in the fractional regime `erdosSeries b A < 1`.
@@ -102,6 +57,20 @@ def erdos257_shellCriterion_under_one_onLargestPrimeFactor (b : ℕ) (A : Set �
   erdos257_shellCriterion_under_one_onLevels b A largestPrimeFactor p
 
 /--
+Same as `erdos257_shellCriterion_under_one_onLargestPrimeFactor`, but additionally requiring
+that the shell decomposition has infinitely many nonempty shells.
+
+This matches the manuscript wording “infinitely many differential shells `P(n)=p_k`”.
+-/
+def erdos257_shellCriterion_under_one_onLargestPrimeFactor_infiniteShells
+    (b : ℕ) (A : Set ℕ) (p : ℕ → ℕ) : Prop :=
+  2 ≤ b → A.Infinite → (∀ n ∈ A, 1 ≤ n) →
+    erdosSeries b A < 1 →
+    (∃ shell : Shell,
+      DifferentialShellLogSmallOnLargestPrimeFactor A shell p ∧ InfiniteShells shell) →
+    Irrational (erdosSeries b A)
+
+/--
 Concrete (axiom-free) theorem form of the shell criterion, assuming you have built the
 analytic→kernel bridge `ShellToKernel b A`.
 
@@ -113,7 +82,8 @@ theorem erdos257_shellCriterion_under_one_of_shellToKernel
     erdos257_shellCriterion_under_one b A := by
   intro hb hA hpos _hlt hshell
   -- The proof does not actually use the extra hypothesis `erdosSeries b A < 1`.
-  exact (shellLogMomentSmall_implies_irrational_of_shellToKernel (b := b) (A := A)) hb hA hpos hshell
+  exact (shellLogMomentSmall_implies_irrational_of_shellToKernel
+   (b := b) (A := A)) hb hA hpos hshell
 
 /--
 Explicit-on-levels version of `erdos257_shellCriterion_under_one_of_shellToKernel`.
@@ -128,7 +98,8 @@ theorem erdos257_shellCriterion_under_one_onLevels_of_shellToKernel
   intro hb hA hpos hlt hshell
   rcases hshell with ⟨shell, hshell⟩
   -- Drop the level condition and apply the already-packaged bridge theorem.
-  exact erdos257_shellCriterion_under_one_of_shellToKernel (b := b) (A := A) hb hA hpos hlt ⟨shell, hshell.1⟩
+  exact erdos257_shellCriterion_under_one_of_shellToKernel
+   (b := b) (A := A) hb hA hpos hlt ⟨shell, hshell.1⟩
 
 /--
 Explicit largest-prime-factor version of
@@ -143,6 +114,23 @@ theorem erdos257_shellCriterion_under_one_onLargestPrimeFactor_of_shellToKernel
   simpa [erdos257_shellCriterion_under_one_onLargestPrimeFactor] using
     (erdos257_shellCriterion_under_one_onLevels_of_shellToKernel (b := b) (A := A)
       (P := largestPrimeFactor) (p := p) hb hA hpos hlt hshell)
+
+/--
+Largest-prime-factor shell criterion with the extra “infinitely many shells” hypothesis,
+assuming the analytic→kernel bridge `[ShellToKernel b A]`.
+
+The proof only uses the small log-moment condition; `InfiniteShells` is recorded to match
+the intended manuscript assumptions.
+-/
+theorem erdos257_shellCriterion_under_one_onLargestPrimeFactor_infiniteShells_of_shellToKernel
+    {b : ℕ} {A : Set ℕ} [ShellToKernel b A]
+    (p : ℕ → ℕ) :
+    erdos257_shellCriterion_under_one_onLargestPrimeFactor_infiniteShells b A p := by
+  intro hb hA hpos hlt hshell
+  rcases hshell with ⟨shell, hshellSmall, _hinf⟩
+  -- Drop `InfiniteShells` and apply the already-packaged largest-prime-factor theorem.
+  exact erdos257_shellCriterion_under_one_onLargestPrimeFactor_of_shellToKernel
+    (b := b) (A := A) (p := p) hb hA hpos hlt ⟨shell, hshellSmall⟩
 
 theorem erdos257_shellCriterion_under_one_iff
     (b : ℕ) (A : Set ℕ) :

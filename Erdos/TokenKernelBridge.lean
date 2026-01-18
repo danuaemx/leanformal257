@@ -17,8 +17,8 @@ for each `k` you have
 
 No analytic estimates are encoded here; those appear only via the `surplus` hypothesis below.
 -/
-structure StageFamily where
-  stage : ℕ → BlockStage ℕ ℕ ℕ
+structure StageFamily (ι : Type) where
+  stage : ℕ → BlockStage ℕ ι ℕ
 
 namespace StageFamily
 
@@ -32,13 +32,20 @@ available blocks to beat both
 
 This is a clean combinatorial proxy for “token density tends to 0 while `|B_k|` grows”.
 -/
-def HasSurplus (F : StageFamily) : Prop :=
+def HasSurplus {ι : Type} (F : StageFamily ι) : Prop :=
   ∀ M : ℕ, ∃ k : ℕ, (F.stage k).U.card + (M + 1) < (F.stage k).B.card
 
-noncomputable def chooseStage (F : StageFamily) (h : HasSurplus F) (M : ℕ) : ℕ :=
+attribute [simp] StageFamily.stage
+
+theorem hasSurplus_of_spec {ι : Type} {F : StageFamily ι}
+    (h : ∀ M : ℕ, ∃ k : ℕ, (F.stage k).U.card + (M + 1) < (F.stage k).B.card) :
+    HasSurplus F :=
+  h
+
+noncomputable def chooseStage {ι : Type} (F : StageFamily ι) (h : HasSurplus F) (M : ℕ) : ℕ :=
   Classical.choose (h M)
 
-theorem chooseStage_spec (F : StageFamily) (h : HasSurplus F) (M : ℕ) :
+theorem chooseStage_spec {ι : Type} (F : StageFamily ι) (h : HasSurplus F) (M : ℕ) :
     (F.stage (chooseStage F h M)).U.card + (M + 1) < (F.stage (chooseStage F h M)).B.card :=
   Classical.choose_spec (h M)
 
@@ -50,7 +57,7 @@ At each step, we choose a stage large enough to avoid the initial segment `0..M`
 
 This makes the resulting sequence strictly increasing, hence unbounded.
 -/
-noncomputable def blocks (F : StageFamily) (h : HasSurplus F) : ℕ → ℕ
+noncomputable def blocks {ι : Type} (F : StageFamily ι) (h : HasSurplus F) : ℕ → ℕ
   | 0 =>
       let k := chooseStage F h 0
       let st := F.stage k
@@ -68,13 +75,14 @@ noncomputable def blocks (F : StageFamily) (h : HasSurplus F) : ℕ → ℕ
       st.val (chooseSafeBlock (st := st) (S := S) hcard)
 
 /-- The sequence `blocks` is strictly increasing. -/
-theorem strictMono_blocks (F : StageFamily) (h : HasSurplus F) : StrictMono (blocks F h) := by
+theorem strictMono_blocks {ι : Type} (F : StageFamily ι) (h : HasSurplus F) :
+    StrictMono (blocks F h) := by
   classical
   -- It suffices to prove `blocks n < blocks (n+1)` for all `n`.
   refine strictMono_nat_of_lt_succ (f := blocks F h) (fun n => ?_)
   set prev : ℕ := blocks F h n with hprev
   set k : ℕ := chooseStage F h prev with hk
-  set st : BlockStage ℕ ℕ ℕ := F.stage k with hst
+  set st : BlockStage ℕ ι ℕ := F.stage k with hst
   set S : Finset ℕ := Finset.range (prev + 1) with hS
   have hcard : st.U.card + S.card < st.B.card := by
     simpa [hk, hst, hS, Finset.card_range] using (chooseStage_spec F h prev)
@@ -93,7 +101,7 @@ theorem strictMono_blocks (F : StageFamily) (h : HasSurplus F) : StrictMono (blo
 /--
 As a consequence, `blocks` has unbounded range in the sense required by `KernelPackage.unbounded`.
 -/
-theorem unbounded_blocks (F : StageFamily) (h : HasSurplus F) :
+theorem unbounded_blocks {ι : Type} (F : StageFamily ι) (h : HasSurplus F) :
     ∀ N (s : Finset ℕ), ∃ n ≥ N, blocks F h n ∉ s := by
   exact unbounded_of_strictMono_nat (blocks F h) (strictMono_blocks F h)
 

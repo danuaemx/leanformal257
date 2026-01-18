@@ -1,5 +1,4 @@
-import Erdos.Basic
-import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Erdos.ShellDefs
 import Erdos.TokenBijection
 import Erdos.BlockWitness
 import Erdos.TokenKernelBridge
@@ -9,53 +8,6 @@ namespace Erdos
 namespace Erdos257
 
 open scoped BigOperators
-
-/--
-A `Shell` is an arbitrary decomposition device: `shell k` is the finite set of indices `m`
-that lie in the `k`-th “differential shell”.
-
-This file only *states* an analytic-to-irrationality theorem interface; it does not attempt
-to build shells from primes/smooth numbers yet.
--/
-def Shell := ℕ → Finset ℕ
-
-/-- The log-moment of a shell: `∑_{m ∈ shell k} log(m) / m` (as a real number). -/
-noncomputable def shellLogMoment (shell : Shell) (k : ℕ) : ℝ :=
-  (shell k).sum (fun m => Real.log (m : ℝ) / (m : ℝ))
-
-/--
-A minimal hypothesis package matching the manuscript phrase
-“the sum `∑ log(m)/m` in each differential shell is ≪ 1”.
-
-`C` is the implied constant in the `≪ 1`.
-
-Notes:
-- We require `1 ≤ m` on each shell so `Real.log (m:ℝ)` behaves as expected.
-- We also record that shells are subsets of `A` (so they are genuinely sums over `A`).
-- The constant `C` is abstract; in applications you can pick `C = 1` or any other bound.
--/
-structure DifferentialShellLogBound (A : Set ℕ) (shell : Shell) : Prop where
-  shell_subset : ∀ k, (↑(shell k) : Set ℕ) ⊆ A
-  shell_pos : ∀ k m, m ∈ shell k → 1 ≤ m
-  exists_bound : ∃ C : ℝ, 0 ≤ C ∧ ∀ k, shellLogMoment shell k ≤ C
-
-/--
-Version of the shell hypothesis that matches the intended “`≪ 1`” smallness: the uniform bound
-constant can be taken *strictly less than 1*.
-
-This is often the quantitatively correct condition needed to force “more safe blocks than hazards”.
-It is stronger than `DifferentialShellLogBound` but still purely analytic.
--/
-structure DifferentialShellLogSmall (A : Set ℕ) (shell : Shell) : Prop where
-  shell_subset : ∀ k, (↑(shell k) : Set ℕ) ⊆ A
-  shell_pos : ∀ k m, m ∈ shell k → 1 ≤ m
-  exists_small : ∃ C : ℝ, 0 ≤ C ∧ C < 1 ∧ ∀ k, shellLogMoment shell k ≤ C
-
-theorem DifferentialShellLogSmall.toBound {A : Set ℕ} {shell : Shell}
-    (h : DifferentialShellLogSmall A shell) : DifferentialShellLogBound A shell := by
-  refine ⟨h.shell_subset, h.shell_pos, ?_⟩
-  rcases h.exists_small with ⟨C, hC0, _hC1, hbound⟩
-  exact ⟨C, hC0, hbound⟩
 
 /--
 Bridge interface: a way to turn an analytic shell bound into the `KernelPackage` required by
@@ -81,7 +33,7 @@ The remaining missing piece for a full `KernelPackage` is the rational-model bri
 `eventually_eq_ratStateNat`.
 -/
 class ShellToStageFamily (A : Set ℕ) : Type where
-  mkFamily : ∀ shell : Shell, DifferentialShellLogBound A shell → Erdos.StageFamily
+  mkFamily : ∀ shell : Shell, DifferentialShellLogBound A shell → Erdos.StageFamily (ℕ × ℕ)
   hasSurplus :
     ∀ shell (hshell : DifferentialShellLogBound A shell),
       Erdos.StageFamily.HasSurplus (mkFamily shell hshell)
@@ -172,6 +124,22 @@ def shellLogMomentSmall_implies_irrational_under_one (b : ℕ) (A : Set ℕ) : P
     Irrational (erdosSeries b A)
 
 /--
+Strengthened statement-only target: require the shell decomposition to have infinitely many
+nonempty shells.
+
+This keeps the hypothesis surface close to the manuscript (“infinitely many differential shells”)
+while remaining axiom-free.
+
+Note: in the current repo, this is still a *statement*; proving it requires constructing the
+analytic→kernel bridge.
+-/
+def shellLogMomentSmall_implies_irrational_under_one_infiniteShells (b : ℕ) (A : Set ℕ) : Prop :=
+  2 ≤ b → A.Infinite → (∀ n ∈ A, 1 ≤ n) →
+    erdosSeries b A < 1 →
+    (∃ shell : Shell, DifferentialShellLogSmall A shell ∧ InfiniteShells shell) →
+    Irrational (erdosSeries b A)
+
+/--
 Implemented implication: assuming a bridge instance `ShellToKernel b A`, the shell-bound
 statement holds.
 
@@ -195,6 +163,37 @@ theorem shellLogMomentSmall_implies_irrational_of_shellToKernel
   rcases hShell with ⟨shell, hshell⟩
   refine shellLogMomentBound_implies_irrational_of_shellToKernel (b := b) (A := A) hb hA hpos ?_
   exact ⟨shell, hshell.toBound⟩
+
+/--
+Convenience theorem: assuming the analytic→kernel bridge `[ShellToKernel b A]`, the existence of a
+shell with `∑ log(m)/m ≪ 1` (with constant `< 1`) implies irrationality of the Erdős series.
+
+This does **not** mention `KernelPackage` in the statement; it is the “shell hypothesis ⇒
+irrationality” form.
+-/
+theorem irrational_of_exists_shellLogMomentSmall_of_shellToKernel
+    {b : ℕ} {A : Set ℕ} [ShellToKernel b A] :
+    (∃ shell : Shell, DifferentialShellLogSmall A shell) →
+      Irrational (erdosSeries b A) := by
+  intro hShell
+  rcases hShell with ⟨shell, hshell⟩
+  have kp : Erdos.Erdos257.KernelPackage b A :=
+    ShellToKernel.mkKernel (b := b) (A := A) shell hshell.toBound
+  exact erdos257_generalized (b := b) (A := A) kp
+
+/--
+Same as `irrational_of_exists_shellLogMomentSmall_of_shellToKernel`, but with the weaker bounded
+shell hypothesis (no `C < 1`).
+-/
+theorem irrational_of_exists_shellLogMomentBound_of_shellToKernel
+    {b : ℕ} {A : Set ℕ} [ShellToKernel b A] :
+    (∃ shell : Shell, DifferentialShellLogBound A shell) →
+      Irrational (erdosSeries b A) := by
+  intro hShell
+  rcases hShell with ⟨shell, hshell⟩
+  have kp : Erdos.Erdos257.KernelPackage b A :=
+    ShellToKernel.mkKernel (b := b) (A := A) shell hshell
+  exact erdos257_generalized (b := b) (A := A) kp
 
 end Erdos257
 
