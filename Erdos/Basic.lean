@@ -851,33 +851,28 @@ theorem not_eventuallyPeriodic_of_unbounded_range
 
 end DistinctnessKernel
 
-section Erdös257
+section Erdos257
 
 /-!
 Generalized Erdős problem #257.
 
-This file deliberately separates the proof into:
+This file separates the proof into:
 
-* an **analytic layer** (Euler-product / tail isolation / density domination) that controls
-  carry interference and ensures the block extraction is well-defined, and
-* a **combinatorial exhaustion layer**: once we have infinitely many structurally new blocks,
-  eventual periodicity is impossible.
+* an **analytic layer** (Euler products / tail isolation / density domination) whose output is a
+  *block sequence* with precise properties, and
+* a **combinatorial exhaustion layer** (fully formalized): once such a block sequence has
+  unbounded range, it cannot be eventually periodic.
 
-Lean currently focuses on the second layer. We assume the analytic/density inputs as axioms
-mirroring the manuscript [mainr(1).tex], then complete the exhaustion argument formally.
+Lean focuses on the second layer. The analytic layer is not yet formalized; instead we make the
+dependency boundary explicit via `KernelPackage`.
 
-Key Lean results used in the final contradiction:
+Key declarations for the final contradiction:
 
-* Analytic/density layer (assumed): `Erdos257.density_axiom`.
-* Derived consequences:
-  `Erdos257.blocks_unbounded_of_density` and
-  `Erdos257.blocks_eventually_eq_ratStateNat_of_density`.
+* Minimal kernel input: `KernelPackage`.
 * Rational periodicity and transfer:
-  `Erdos257.ratStateNat_eventuallyPeriodic`,
-  `Erdos257.eventuallyPeriodic_of_eventuallyEq`,
-  `Erdos257.rational_series_eventuallyPeriodic_blocks`.
-* Final statement:
-  `Erdos257.erdos257_generalized`.
+  `ratStateNat_eventuallyPeriodic`, `eventuallyPeriodic_of_eventuallyEq`,
+  `rational_series_eventuallyPeriodic_blocks`.
+* Final statement (kernel ⇒ irrational): `erdos257_generalized`.
 -/
 namespace Erdos257
 
@@ -894,7 +889,7 @@ the purely combinatorial kernel is unconditional, and the analytic content is an
 
 Relevant Lean declaration:
 
-* Analytic/density hypothesis bundle: `DensityPackage`.
+* Minimal kernel input: `KernelPackage`.
 -/
 
 /-!
@@ -1054,25 +1049,43 @@ assumption.
 -/
 
 /--
-Analytic/density hypothesis bundle.
+Minimal kernel input.
 
-This is the exact interface required by the fully formal combinatorial kernel.
+This is the *only* data actually used by the fully formal combinatorial argument:
+
+1. A block sequence `blocks`.
+2. An unbounded-range hypothesis on that sequence.
+3. A bridge from rationality of `erdosSeries b A` to eventual agreement with the
+   finite-state rational model `ratStateNat`.
+
+Everything else (Euler products, tail isolation, density bounds) is “upstream” of producing
+this package.
 -/
-structure DensityPackage (b : ℕ) (A : Set ℕ) where
+structure KernelPackage (b : ℕ) (A : Set ℕ) where
+  /-- The extracted integer block sequence (one block per stage). -/
+  blocks : ℕ → ℕ
+  /-- Exhaustion: the block values are not eventually contained in a finite set. -/
+  unbounded : ∀ N (s : Finset ℕ), ∃ n ≥ N, blocks n ∉ s
+  /--
+  Rational model bridge: rational values force eventual agreement with the remainder recursion.
+  -/
+  eventually_eq_ratStateNat :
+    ∀ q : ℚ, erdosSeries b A = q → ∃ N, ∀ n ≥ N, blocks n = ratStateNat b q n
+
+/--
+Convenience wrapper bundling the ambient assumptions (`b ≥ 2`, `A` infinite, positivity).
+
+These fields are *not used* by the combinatorial kernel proof itself, but they are the
+standard hypotheses in the Erdős-257 statement and are often available in analytic
+constructions.
+-/
+structure DensityPackage (b : ℕ) (A : Set ℕ) extends KernelPackage b A where
   /-- Base constraint used throughout (the manuscript assumes `b ≥ 2`). -/
   hb : 2 ≤ b
   /-- Infinitude of the index set. -/
   hA : A.Infinite
   /-- Positivity convention on indices (used to avoid degenerate `n=0`). -/
   hpos : ∀ n ∈ A, 1 ≤ n
-  /-- The extracted integer block sequence (one block per stage). -/
-  blocks : ℕ → ℕ
-  /-- Exhaustion: the block values are not eventually contained in a finite set. -/
-  unbounded : ∀ N (s : Finset ℕ), ∃ n ≥ N, blocks n ∉ s
-  /-- Rational model bridge: rational values force eventual agreement with the remainder recursion.
-      This is where the analytic/density layer enters the formal contradiction. -/
-  eventually_eq_ratStateNat :
-    ∀ q : ℚ, erdosSeries b A = q → ∃ N, ∀ n ≥ N, blocks n = ratStateNat b q n
 
 /--
 Rationality ⇒ eventual periodicity (at the level of the extracted blocks).
@@ -1082,7 +1095,7 @@ In the TeX manuscript this is mediated by the purely periodic representation `0.
 and the stability of boundaries.
 -/
 theorem rational_series_eventuallyPeriodic_blocks
-    (pkg : DensityPackage b A)
+  (pkg : KernelPackage b A)
     (q : ℚ) :
     erdosSeries b A = q → EventuallyPeriodic pkg.blocks := by
   intro hq
@@ -1093,26 +1106,20 @@ theorem rational_series_eventuallyPeriodic_blocks
   exact eventuallyPeriodic_of_eventuallyEq (f := pkg.blocks) (g := ratStateNat b q) hEq hrat
 
 theorem erdos257_generalized
-    (pkg : DensityPackage b A) :
+    (pkg : KernelPackage b A) :
     Irrational (erdosSeries b A) := by
   classical
   -- `Irrational x` means `x` is not in the range of the rational casting map.
   rintro ⟨q, hq⟩
-  -- Analytic/density layer (assumed via `pkg`): blocks have unbounded range.
-  have hunb : ∀ N (s : Finset ℕ), ∃ n ≥ N, pkg.blocks n ∉ s :=
-    pkg.unbounded
-  -- Rationality layer: rational values force eventual periodicity.
-  have hper : EventuallyPeriodic pkg.blocks := by
-    -- Rewrite the witness equation into the shape expected by the rational-model bridge.
-    have : erdosSeries b A = q := by simpa [eq_comm] using hq
-    exact rational_series_eventuallyPeriodic_blocks (b := b) (A := A) pkg q this
-  -- Exhaustion kernel: unbounded range contradicts eventual periodicity.
-  have hnot : ¬ EventuallyPeriodic pkg.blocks :=
-    not_eventuallyPeriodic_of_unbounded_range (f := pkg.blocks) hunb
-  exact hnot hper
+  -- Rewrite the witness equation into the shape expected by the rational-model bridge.
+  have hq' : erdosSeries b A = q := by
+    simpa [eq_comm] using hq
+  have hper : EventuallyPeriodic pkg.blocks :=
+    rational_series_eventuallyPeriodic_blocks (b := b) (A := A) pkg q hq'
+  exact (not_eventuallyPeriodic_of_unbounded_range (f := pkg.blocks) pkg.unbounded) hper
 
 end Erdos257
 
-end Erdös257
+end Erdos257
 
 end Erdos
