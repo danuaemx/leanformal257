@@ -132,6 +132,46 @@ theorem lt_lcm_of_coprime_of_one_lt_left
   simpa [hlcm, Nat.one_mul] using hmul
 
 /-!
+### Geometric period growth
+
+In the manuscript, the stabilized periods satisfy an `lcm`-recurrence
+
+`L_{n+1} = lcm(L_n, a^*_{n+1})`,
+
+and one chooses the factors `a^*_{n+1}` so that they are coprime to the previous period and
+uniformly bounded below by `2`. In that case, the recurrence forces geometric growth.
+
+We record the clean arithmetic core: if each step adjoins a new coprime factor `K n ≥ 2`, then
+`L n ≥ L 0 * 2^n`.
+-/
+
+theorem lcmRec_geometric_lower_bound
+    (L K : ℕ → ℕ)
+    (hrec : ∀ n, L (n + 1) = Nat.lcm (L n) (K n))
+    (hcop : ∀ n, Nat.Coprime (L n) (K n))
+    (hK : ∀ n, 2 ≤ K n) :
+    ∀ n, L n ≥ L 0 * 2 ^ n := by
+  intro n
+  induction n with
+  | zero =>
+    simp
+  | succ n ih =>
+    -- Expand the recurrence and use coprimality to turn `lcm` into multiplication.
+    have hlcm : Nat.lcm (L n) (K n) = L n * K n := by
+      simpa using (lcm_eq_mul_of_coprime (L := L n) (K := K n) (hcop n))
+    -- Now bound `K n` below by `2` and apply the induction hypothesis.
+    calc
+      L (n + 1) = Nat.lcm (L n) (K n) := hrec n
+      _ = L n * K n := hlcm
+      _ ≥ L n * 2 := Nat.mul_le_mul_left (L n) (hK n)
+      _ ≥ (L 0 * 2 ^ n) * 2 := by
+        simpa [Nat.mul_assoc, Nat.mul_left_comm, Nat.mul_comm] using
+          (Nat.mul_le_mul_right 2 ih)
+      _ = L 0 * 2 ^ (n + 1) := by
+        -- `2^(n+1) = 2^n * 2`.
+        simp [pow_succ, Nat.mul_assoc]
+
+/-!
 ### Denominator growth from period growth
 
 For a purely periodic base-`b` expansion with period length `L`, the natural denominator is

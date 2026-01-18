@@ -10,6 +10,9 @@ import Erdos.ShellDensity
 import Erdos.ShellIrrationality
 import Erdos.ShellToKernelBridge
 import Erdos.ShellToRationalModelRecursion
+import Erdos.ShellBoundaryStability
+import Erdos.BlockModelNoCarry
+import Erdos.ShellStageNoSubPeriod
 import Erdos.FullClaim
 
 namespace Erdos
