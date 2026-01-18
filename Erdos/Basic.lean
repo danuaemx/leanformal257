@@ -29,10 +29,11 @@ Current status:
   domination / boundary stability) is *proved in the manuscript* (see in particular
   Theorem `thm:tail_isolation_expanded` and the density discussion around
   Definition `def:sup_dens`), but is *not yet formalized in Lean*.
-  In this scaffold it is packaged as a single axiom `Erdos257.density_axiom`.
+  In this scaffold it is packaged as an explicit hypothesis structure
+  `Erdos257.DensityPackage`.
 
 Consequently, the theorem `Erdos257.erdos257_generalized` is a genuine Lean theorem, but it is
-conditional on `density_axiom`.
+conditional on supplying a `DensityPackage`.
 
 Navigation guide (Lean names corresponding to manuscript steps):
 
@@ -48,9 +49,7 @@ Navigation guide (Lean names corresponding to manuscript steps):
   `BlockModel.trunc_add_blockBase_mul_carry`, and the generalized concatenation machinery
   `BlockModel.concatWithCarryTrace` together with
   `BlockModel.concatWithCarry_index_decomp` and `BlockModel.concatWithCarryBlocks_lt_blockBase`.
-* **Final contradiction pipeline:** `Erdos257.density_axiom` ⇒
-  `Erdos257.blocks_unbounded_of_density` and
-  `Erdos257.blocks_eventually_eq_ratStateNat_of_density` ⇒
+* **Final contradiction pipeline:** `Erdos257.DensityPackage` ⇒
   `Erdos257.rational_series_eventuallyPeriodic_blocks` ⇒
   `Erdos257.erdos257_generalized`.
 -/
@@ -150,62 +149,13 @@ Key Lean results in this section:
 
 def periodDenom (b L : ℕ) : ℕ := b ^ L - 1
 
-theorem pow_lt_pow_of_lt_right {b m n : ℕ} (hb : 1 < b) (hmn : m < n) : b ^ m < b ^ n := by
-  -- Write `n = m + k` with `k > 0`, then compare `b^m` and `b^m * b^k`.
-  have hb0 : 0 < b := lt_trans Nat.zero_lt_one hb
-  have hmnle : m ≤ n := Nat.le_of_lt hmn
-  rcases Nat.exists_eq_add_of_le hmnle with ⟨k, hk⟩
-  have hkpos : 0 < k := by
-    have hkne : k ≠ 0 := by
-      intro hk0
-      have : m = n := by
-        -- If `k = 0`, then `n = m`, contradicting `m < n`.
-        simpa [hk0] using hk.symm
-      exact (Nat.ne_of_lt hmn) this
-    exact Nat.pos_of_ne_zero hkne
-  have hone_le : ∀ t : ℕ, 1 ≤ b ^ t := by
-    intro t
-    induction t with
-    | zero => simp
-    | succ t ih =>
-      simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using
-        Nat.mul_le_mul ih (Nat.le_of_lt hb)
-  have hone_lt_powk : 1 < b ^ k := by
-    cases k with
-    | zero => cases (Nat.not_lt_zero 0 hkpos)
-    | succ k =>
-      -- `b ≤ b^(k+1)` and `1 < b`.
-      have hb_le : b ≤ b ^ (Nat.succ k) := by
-        calc
-          b = 1 * b := by simp
-          _ ≤ b ^ k * b := Nat.mul_le_mul_right b (hone_le k)
-          _ = b ^ (Nat.succ k) := by simp [pow_succ, Nat.mul_comm]
-      exact lt_of_lt_of_le hb hb_le
-  calc
-    b ^ m = b ^ m * 1 := by simp
-    _ < b ^ m * b ^ k := Nat.mul_lt_mul_of_pos_left hone_lt_powk (pow_pos hb0 _)
-    _ = b ^ (m + k)
-    := by simp [pow_add]
-    _ = b ^ n
-    := by simp [hk]
-
 theorem periodDenom_lt_of_lt
     {b m n : ℕ} (hb : 1 < b) (hmn : m < n) :
     periodDenom b m < periodDenom b n := by
-  -- `b^m < b^n`, and subtracting `1` preserves strict inequality here.
-  -- (Both sides are ≥ 1 because `b^m ≥ 1`.)
-  have hpow : b ^ m < b ^ n := pow_lt_pow_of_lt_right (b := b) hb hmn
-  -- Use monotonicity of subtraction by a constant.
-  have h1le : 1 ≤ b ^ m := by
-    -- Reuse the same argument from `pow_lt_pow_of_lt_right` (but simpler): `1 ≤ b^m` when `1 < b`.
-    have : ∀ t : ℕ, 1 ≤ b ^ t := by
-      intro t
-      induction t with
-      | zero => simp
-      | succ t ih =>
-        simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using
-          Nat.mul_le_mul ih (Nat.le_of_lt hb)
-    exact this m
+  -- `b^m < b^n` for `1 < b`, and subtraction by a fixed constant preserves strict inequality
+  -- as soon as the left side is at least that constant.
+  have hpow : b ^ m < b ^ n := pow_lt_pow_right₀ (a := b) hb hmn
+  have h1le : 1 ≤ b ^ m := Nat.one_le_pow m b (lt_trans Nat.zero_lt_one hb)
   exact Nat.sub_lt_sub_right h1le hpow
 
 theorem periodDenom_le_of_le
@@ -932,26 +882,19 @@ Key Lean results used in the final contradiction:
 namespace Erdos257
 
 /-!
-### Block extraction (formalized as a definition)
+### Block extraction (formalized as an explicit hypothesis)
 
 The TeX proof constructs an infinite sequence of integer blocks (period words) from the series.
 
 At this stage we **do not** formalize the full analytic construction; instead we package the
-manuscript's analytic/density conclusions as a single axiom that *implies the existence* of a
-block-extraction function with the needed properties.
+manuscript's analytic/density conclusions as an explicit hypothesis structure.
 
-We then *define* `blocks` by classical choice from that existence axiom.
+This removes axioms from the codebase and makes the dependency boundary precise:
+the purely combinatorial kernel is unconditional, and the analytic content is an explicit input.
 
-This way, `blocks` is no longer an axiom: it is a bona fide Lean definition, and the only
-remaining non-formalized ingredient is the single analytic/density axiom.
+Relevant Lean declaration:
 
-Relevant Lean declarations:
-
-* Analytic existence package (axiom): `density_axiom`.
-* Chosen block sequence: `blocks`.
-* Two extracted consequences used later:
-  `blocks_unbounded_of_density` and
-  `blocks_eventually_eq_ratStateNat_of_density`.
+* Analytic/density hypothesis bundle: `DensityPackage`.
 -/
 
 /-!
@@ -1088,12 +1031,12 @@ theorem eventuallyPeriodic_of_eventuallyEq
     _ = f n := (hfg n hn1).symm
 
 /-!
-### Single analytic/density axiom
+### Using the analytic/density bundle
 
 We consolidate the manuscript's analytic input (tail isolation + density domination + stability of
-integer boundaries) into a single axiom.
+integer boundaries) into a single hypothesis bundle.
 
-This axiom is the *only* nontrivial external prerequisite used by the main irrationality theorem
+This bundle is the *only* nontrivial external prerequisite used by the main irrationality theorem
 in this scaffold.
 
 It has two consequences:
@@ -1105,46 +1048,31 @@ It has two consequences:
 Everything else (eventual periodicity of the rational recursion, transfer lemmas, contradiction)
 is proved in Lean.
 
-In the manuscript this axiom is discharged using Euler-product/tail bounds and deterministic
-density domination in the Diophantine region. In this Lean scaffold we keep it as an axiom.
-
-In Lean we immediately derive the two concrete consequences needed by the contradiction:
-`blocks_unbounded_of_density` and `blocks_eventually_eq_ratStateNat_of_density`.
+In the manuscript this bundle is discharged using Euler-product/tail bounds and deterministic
+density domination in the Diophantine region. In this Lean scaffold we keep it as an explicit
+assumption.
 -/
-
-axiom density_axiom :
-    ∃ blk : (b : ℕ) → (A : Set ℕ) → ℕ → ℕ,
-      ∀ (b : ℕ) (_hb : 2 ≤ b)
-        (A : Set ℕ) (_hA : A.Infinite)
-        (_hpos : ∀ n ∈ A, 1 ≤ n),
-        (∀ N (s : Finset ℕ), ∃ n ≥ N, blk b A n ∉ s) ∧
-          (∀ q : ℚ, erdosSeries b A = q → ∃ N, ∀ n ≥ N, blk b A n = ratStateNat b q n)
-
-/-- The (formal) block sequence, defined by choice from the analytic/density axiom. -/
-noncomputable def blocks : (b : ℕ) → (A : Set ℕ) → ℕ → ℕ :=
-  Classical.choose density_axiom
-
-/-- Deterministic density domination / exhaustion (derived from `density_axiom`). -/
-theorem blocks_unbounded_of_density
-    (b : ℕ) (hb : 2 ≤ b)
-    (A : Set ℕ) (hA : A.Infinite)
-    (hpos : ∀ n ∈ A, 1 ≤ n) :
-    ∀ N (s : Finset ℕ), ∃ n ≥ N, blocks b A n ∉ s := by
-  simpa [blocks] using (Classical.choose_spec density_axiom) b hb A hA hpos |>.1
 
 /--
-Density/stability bridge: once carry-interference is excluded by the manuscript's density bounds,
-the extracted blocks agree (eventually) with the rational finite-state sequence.
+Analytic/density hypothesis bundle.
 
-This is exactly where the analytic/density layer is used.
+This is the exact interface required by the fully formal combinatorial kernel.
 -/
-theorem blocks_eventually_eq_ratStateNat_of_density
-    (b : ℕ) (hb : 2 ≤ b)
-    (A : Set ℕ) (hA : A.Infinite)
-    (hpos : ∀ n ∈ A, 1 ≤ n)
-    (q : ℚ) :
-    erdosSeries b A = q → ∃ N, ∀ n ≥ N, blocks b A n = ratStateNat b q n
-  := (Classical.choose_spec density_axiom) b hb A hA hpos |>.2 q
+structure DensityPackage (b : ℕ) (A : Set ℕ) where
+  /-- Base constraint used throughout (the manuscript assumes `b ≥ 2`). -/
+  hb : 2 ≤ b
+  /-- Infinitude of the index set. -/
+  hA : A.Infinite
+  /-- Positivity convention on indices (used to avoid degenerate `n=0`). -/
+  hpos : ∀ n ∈ A, 1 ≤ n
+  /-- The extracted integer block sequence (one block per stage). -/
+  blocks : ℕ → ℕ
+  /-- Exhaustion: the block values are not eventually contained in a finite set. -/
+  unbounded : ∀ N (s : Finset ℕ), ∃ n ≥ N, blocks n ∉ s
+  /-- Rational model bridge: rational values force eventual agreement with the remainder recursion.
+      This is where the analytic/density layer enters the formal contradiction. -/
+  eventually_eq_ratStateNat :
+    ∀ q : ℚ, erdosSeries b A = q → ∃ N, ∀ n ≥ N, blocks n = ratStateNat b q n
 
 /--
 Rationality ⇒ eventual periodicity (at the level of the extracted blocks).
@@ -1154,37 +1082,33 @@ In the TeX manuscript this is mediated by the purely periodic representation `0.
 and the stability of boundaries.
 -/
 theorem rational_series_eventuallyPeriodic_blocks
-    (b : ℕ) (hb : 2 ≤ b)
-    (A : Set ℕ) (hA : A.Infinite)
-    (hpos : ∀ n ∈ A, 1 ≤ n)
+    (pkg : DensityPackage b A)
     (q : ℚ) :
-    erdosSeries b A = q → EventuallyPeriodic (blocks b A) := by
+    erdosSeries b A = q → EventuallyPeriodic pkg.blocks := by
   intro hq
   have hrat :
   EventuallyPeriodic (ratStateNat b q) := ratStateNat_eventuallyPeriodic (b := b) (q := q)
-  have hEq : ∃ N, ∀ n ≥ N, blocks b A n = ratStateNat b q n :=
-    blocks_eventually_eq_ratStateNat_of_density b hb A hA hpos q hq
-  exact eventuallyPeriodic_of_eventuallyEq (f := blocks b A) (g := ratStateNat b q) hEq hrat
+  have hEq : ∃ N, ∀ n ≥ N, pkg.blocks n = ratStateNat b q n :=
+    pkg.eventually_eq_ratStateNat q hq
+  exact eventuallyPeriodic_of_eventuallyEq (f := pkg.blocks) (g := ratStateNat b q) hEq hrat
 
 theorem erdos257_generalized
-    (b : ℕ) (hb : 2 ≤ b)
-    (A : Set ℕ) (hA : A.Infinite)
-    (hpos : ∀ n ∈ A, 1 ≤ n) :
+    (pkg : DensityPackage b A) :
     Irrational (erdosSeries b A) := by
   classical
   -- `Irrational x` means `x` is not in the range of the rational casting map.
   rintro ⟨q, hq⟩
-  -- Analytic/density layer (assumed): blocks have unbounded range.
-  have hunb : ∀ N (s : Finset ℕ), ∃ n ≥ N, blocks b A n ∉ s :=
-    blocks_unbounded_of_density b hb A hA hpos
-  -- Rationality layer (assumed): rational values force eventual periodicity.
-  have hper : EventuallyPeriodic (blocks b A) := by
-    -- Rewrite the witness equation into the shape expected by the axiom.
+  -- Analytic/density layer (assumed via `pkg`): blocks have unbounded range.
+  have hunb : ∀ N (s : Finset ℕ), ∃ n ≥ N, pkg.blocks n ∉ s :=
+    pkg.unbounded
+  -- Rationality layer: rational values force eventual periodicity.
+  have hper : EventuallyPeriodic pkg.blocks := by
+    -- Rewrite the witness equation into the shape expected by the rational-model bridge.
     have : erdosSeries b A = q := by simpa [eq_comm] using hq
-    exact rational_series_eventuallyPeriodic_blocks b hb A hA hpos q this
+    exact rational_series_eventuallyPeriodic_blocks (b := b) (A := A) pkg q this
   -- Exhaustion kernel: unbounded range contradicts eventual periodicity.
-  have hnot : ¬ EventuallyPeriodic (blocks b A) :=
-    not_eventuallyPeriodic_of_unbounded_range (f := blocks b A) hunb
+  have hnot : ¬ EventuallyPeriodic pkg.blocks :=
+    not_eventuallyPeriodic_of_unbounded_range (f := pkg.blocks) hunb
   exact hnot hper
 
 end Erdos257
