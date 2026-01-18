@@ -2,20 +2,35 @@ name: Lean Action CI
 
 on:
   push:
-  pull_request:
-  workflow_dispatch:
+    branches: ["master"] # Ejecutar en master
+  pull_request:          # Ejecutar tests en PRs
+  workflow_dispatch:     # Ejecutar manualmente si se necesita
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Permisos necesarios para subir a GitHub Pages
 permissions:
-  contents: read # Read access to repository contents
-  pages: write # Write access to GitHub Pages
-  id-token: write # Write access to ID tokens
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - uses: actions/checkout@v5
-      - uses: leanprover/lean-action@v1
-      - uses: leanprover-community/docgen-action@v1
+      # 1. Bajar el código (Usa v4, v5 no existe)
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Instalar Elan y compilar el proyecto (Testeo básico)
+      - name: Build and Check
+        uses: leanprover/lean-action@v1
+
+      # 3. Generar documentación (SOLO en la rama master)
+      - name: Generate Docs
+        if: github.ref == 'refs/heads/master'
+        uses: leanprover-community/docgen-action@v1
+
+      # 4. Desplegar a GitHub Pages (SOLO si se generaron los docs)
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/master'
+        uses: actions/deploy-pages@v4

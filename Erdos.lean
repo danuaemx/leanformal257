@@ -54,6 +54,20 @@ def erdos257_shellCriterion_under_one_onLevels (b : ℕ) (A : Set ℕ)
     Irrational (erdosSeries b A)
 
 /--
+Same as `erdos257_shellCriterion_under_one_onLevels`, but also recording that there are
+infinitely many nonempty shells.
+
+This matches the manuscript wording “infinitely many differential shells `P(n)=p_k`” (and is
+the formal proxy for “the period keeps expanding / shells keep appearing”).
+-/
+def erdos257_shellCriterion_under_one_onLevels_infiniteShells
+    (b : ℕ) (A : Set ℕ) (P : ℕ → ℕ) (p : ℕ → ℕ) : Prop :=
+  2 ≤ b → A.Infinite → (∀ n ∈ A, 1 ≤ n) →
+    erdosSeries b A < 1 →
+    (∃ shell : Shell, DifferentialShellLogSmallOnLevels A shell P p ∧ InfiniteShells shell) →
+    Irrational (erdosSeries b A)
+
+/--
 Specialization of `erdos257_shellCriterion_under_one_onLevels` to the manuscript choice
 `P(n) =` largest prime factor of `n`.
 -/
@@ -104,6 +118,22 @@ theorem erdos257_shellCriterion_under_one_onLevels_of_shellToKernel
   -- Drop the level condition and apply the already-packaged bridge theorem.
   exact erdos257_shellCriterion_under_one_of_shellToKernel
    (b := b) (A := A) hb hA hpos hlt ⟨shell, hshell.1⟩
+
+/--
+`ShellToKernel`-powered version of `erdos257_shellCriterion_under_one_onLevels_infiniteShells`.
+
+As elsewhere, `InfiniteShells` is bookkeeping to match the manuscript; the current proof uses
+only the small log-moment condition.
+-/
+theorem erdos257_shellCriterion_under_one_onLevels_infiniteShells_of_shellToKernel
+    {b : ℕ} {A : Set ℕ} [ShellToKernel b A]
+    (P : ℕ → ℕ) (p : ℕ → ℕ) :
+    erdos257_shellCriterion_under_one_onLevels_infiniteShells b A P p := by
+  intro hb hA hpos hlt hshell
+  rcases hshell with ⟨shell, hshellSmall, _hinf⟩
+  -- Drop `InfiniteShells` and reuse the on-levels theorem.
+  exact erdos257_shellCriterion_under_one_onLevels_of_shellToKernel
+    (b := b) (A := A) (P := P) (p := p) hb hA hpos hlt ⟨shell, hshellSmall⟩
 
 /--
 Explicit largest-prime-factor version of
