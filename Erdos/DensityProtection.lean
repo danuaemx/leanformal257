@@ -80,6 +80,53 @@ theorem hazardTokensOn_card_lt_mu_of_shellLogMoment_lt_half
   exact_mod_cast hcardR
 
 /--
+Stronger quantitative form: if the shell log-moment is `< 1/8`, then the hazard universe occupies
+strictly fewer than `μ/4` blocks, i.e. `4 * |U| < μ`.
+
+This is the exact numeric strength that matches the “no subperiod” lemma in
+[Erdos/BlockModelNoCarry.lean](Erdos/BlockModelNoCarry.lean): subperiods satisfy `p ≤ length/2`,
+so we need `2*|Bad| < length-p` uniformly, which is guaranteed by `|Bad| < length/4`.
+-/
+theorem hazardTokensOn_card_four_mul_lt_mu_of_shellLogMoment_lt_eighth
+    (shell : Shell) (k : ℕ) (st : Erdos.ShellStage)
+    (hμ : 0 < st.μ)
+    (hactive : st.active = shell k)
+    (hpos : ∀ n ∈ shell k, 1 ≤ n)
+    (hleμ : ∀ n ∈ shell k, n ≤ st.μ)
+    (hcop : ∀ n ∈ st.active, Nat.Coprime st.L n)
+    (hm : ∀ n ∈ st.active, st.M n < n)
+    (hne : ∀ n ∈ st.active, n ≠ 0)
+    (hMlog : ∀ n ∈ shell k, (st.M n : ℝ) ≤ Real.log (n : ℝ))
+    (hdens : shellLogMoment shell k < (1 / 8 : ℝ)) :
+    4 * (Erdos.ShellStage.hazardTokensOn st).card < st.μ := by
+  classical
+  have hμR : (0 : ℝ) < (st.μ : ℝ) := by exact_mod_cast hμ
+
+  have hdens_le : ((Erdos.ShellStage.hazardTokensOn st).card : ℝ) / (st.μ : ℝ)
+      ≤ 2 * shellLogMoment shell k :=
+    hazardTokensOn_density_le_two_mul_shellLogMoment
+      (shell := shell) (k := k) (st := st)
+      hμ hactive hpos hleμ hcop hm hne hMlog
+
+  have hfrac : ((Erdos.ShellStage.hazardTokensOn st).card : ℝ) / (st.μ : ℝ) < (1 / 4 : ℝ) := by
+    have : 2 * shellLogMoment shell k < (1 / 4 : ℝ) := by
+      nlinarith
+    exact lt_of_le_of_lt hdens_le this
+
+  have hcardR : ((Erdos.ShellStage.hazardTokensOn st).card : ℝ) < (st.μ : ℝ) / 4 := by
+    -- multiply `a/μ < 1/4` by `μ`.
+    have := (div_lt_iff₀ hμR).1 hfrac
+    simpa [div_eq_mul_inv, one_div, mul_comm, mul_left_comm, mul_assoc] using this
+
+  have h4R : ((4 * (Erdos.ShellStage.hazardTokensOn st).card : ℕ) : ℝ) < (st.μ : ℝ) := by
+    -- from `card < μ/4` we get `4*card < μ`.
+    have : (4 : ℝ) * ((Erdos.ShellStage.hazardTokensOn st).card : ℝ) < (st.μ : ℝ) := by
+      nlinarith
+    simpa [Nat.cast_mul] using this
+
+  exact_mod_cast h4R
+
+/--
 If blocks are made distinct by the phase shift `val q = (q·L) mod μ` (so `hinj` holds), and the
 shell density is small enough that `< μ/2`, then there exists a safe block index not corrupted
 by carries.

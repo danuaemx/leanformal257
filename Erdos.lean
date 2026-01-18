@@ -4,6 +4,7 @@ import Erdos.ShellLevels
 import Erdos.TokenBijection
 import Erdos.HazardMaps
 import Erdos.ShellStage
+import Erdos.PerturbBlocks
 import Erdos.HazardCounting
 import Erdos.HazardTokenCard
 import Erdos.ShellDensity
